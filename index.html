@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Стань программистом за 60 секунд!</title>
+    <style>
+       body { 
+    margin: 0; 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #1a1a1a;
+    color: white;
+    overflow: hidden;
+}
+
+#codePanel { 
+    width: 40%; 
+    padding: 25px; 
+    background: #2d2d2d; 
+    color: #f8f8f2;
+    font-family: 'Courier New', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px; /* Чуть уменьшаем для мобильных */
+    height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    border-right: 3px solid #007acc;
+}
+
+/* Добавляем медиа-запрос для мобильных */
+@media (max-width: 768px) {
+    #codePanel {
+        font-size: 12px;
+        padding: 15px;
+    }
+    
+    .editable {
+        padding: 2px 6px;
+        font-size: 12px;
+    }
+    
+    button {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}
+        
+        /* Выблор игры */
+        #scenarioSelection {
+            text-align: center;
+            padding: 50px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .scenarios-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .scenario-card {
+            width: 250px;
+            padding: 25px;
+            background: #2d2d2d;
+            border-radius: 15px;
+            cursor: pointer;
+            border: 3px solid #444;
+            transition: all 0.3s ease;
+        }
+        
+        .scenario-card:hover {
+            border-color: #007acc;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,122,204,0.3);
+        }
+        
+        /* Основной экран */
+        #mainApp { 
+            display: none; 
+            height: 100vh;
+        }
+        
+        #codePanel { 
+            width: 40%; 
+            padding: 25px; 
+            background: #2d2d2d; 
+            color: #f8f8f2;
+            font-family: 'Courier New', monospace; 
+            font-size: 16px;
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+            border-right: 3px solid #007acc;
+        }
+        
+        #visualPanel { 
+            width: 60%; 
+            height: 100vh;
+            position: relative;
+        }
+        
+        #mainCanvas {
+            display: block;
+        }
+        
+        .editable { 
+            background: #3e3e3e; 
+            padding: 3px 8px; 
+            border: 2px dashed #666; 
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .editable:hover { 
+            background: #4e4e4e; 
+            border-color: #888;
+            transform: scale(1.05);
+        }
+        
+        button { 
+            padding: 12px 24px; 
+            margin: 15px 5px;
+            font-size: 16px; 
+            cursor: pointer;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #005a9e;
+            transform: translateY(-2px);
+        }
+        
+        .task {
+            background: #3a3a3a;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007acc;
+        }
+        
+        .success-message {
+            background: #2d5a2d;
+            color: #90ee90;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ЭКРАН ВЫБОРА СЦЕНАРИЯ -->
+<div id="scenarioSelection">
+    <h1 style="font-size: 2.5em; margin-bottom: 10px;">🎮 ВЫБЕРИ СВОЮ СИЛУ ПРОГРАММИСТА!</h1>
+    <p style="font-size: 1.2em; color: #ccc;">Измени всего одну строчку кода и увидишь магию!</p>
+    
+    <div class="scenarios-container">
+        <div class="scenario-card" onclick="startScenario('gravity')">
+            <h2>ГРАВИТАЦИЯ</h2>
+            <p>Управляй физикой шариков! Меняй гравитацию и трение</p>
+            <div style="font-size: 3em; margin: 15px 0;"></div>
+        </div>
+        
+        <div class="scenario-card" onclick="startScenario('colors')">
+            <h2>ЦВЕТНАЯ ИНФЕКЦИЯ</h2>
+            <p>Создай вирусный визуальный эффект!</p>
+            <div style="font-size: 3em; margin: 15px 0;"></div>
+        </div>
+        
+        <div class="scenario-card" onclick="startScenario('particles')">
+            <h2>ЧАСТИЦЫ</h2>
+            <p>Управляй тысячами частиц!</p>
+            <div style="font-size: 3em; margin: 15px 0;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
+<div id="mainApp">
+    <div id="codePanel">
+        <h2>ТВОЙ ПЕРВЫЙ КОД:</h2>
+        <pre id="codeDisplay"></pre>
+        
+        <div class="success-message" id="successMessage">
+            Успех! Изменения применены!
+        </div>
+        
+        <div id="tasks">
+            <h3>ЗАДАНИЯ:</h3>
+        </div>
+        
+        <button onclick="applyChanges()">ЗАПУСТИТЬ ИЗМЕНЕНИЯ!</button>
+        <button onclick="showScenarioSelection()">← ВЫБРАТЬ ДРУГОЙ СЦЕНАРИЙ</button>
+    </div>
+    <div id="visualPanel">
+        <canvas id="mainCanvas"></canvas>
+    </div>
+</div>
+
+<script>
+
+const scenarios = {
+    gravity: {
+        code: `function updatePhysics() {
+  gravity = <span class="editable" id="gravity">0.5</span>;
+  friction = <span class="editable" id="friction">0.99</span>;
+  ballSize = <span class="editable" id="ballSize">30</span>;
+}`,
+        tasks: [
+            "СДЕЛАЙ НЕВЕСОМОСТЬ!",
+            "СДЕЛАЙ СУПЕР-ГРАВИТАЦИЮ!", 
+            "СДЕЛАЙ ВАКУУМ!"
+        ],
+        variables: {
+            gravity: 0.5,
+            friction: 0.99,
+            ballSize: 30
+        }
+    },
+    
+    colors: {
+        code: `function drawParticles() {
+  particleCount = <span class="editable" id="count">100</span>;
+  spreadSpeed = <span class="editable" id="speed">2</span>;
+  color = [<span class="editable" id="colorR">255</span>, 0, 0];
+}`,
+        tasks: [
+            "ЗАРАЗИ ВЕСЬ ЭКРАН!",
+            "СУПЕР-СКОРОСТЬ!", 
+            "СМЕНИ ЦВЕТ!"
+        ],
+        variables: {
+            count: 100,
+            speed: 2,
+            colorR: 255
+        }
+    },
+    
+    particles: {
+        code: `function createExplosion() {
+  particles = <span class="editable" id="particles">200</span>;
+  explosionPower = <span class="editable" id="power">5</span>;
+  lifeTime = <span class="editable" id="life">100</span>;
+}`,
+        tasks: [
+            "ИЗМЕНИ КОЛИЧЕСТВО ТОЧЕК",
+            "СДЕЛАЙ ВЗРЫВ СИЛЬНЕЕ",
+            "СДЕЛАЙ, ЧТО БЫ ЧАСТИЦЫ ЖИЛИ ДОЛЬШЕ"
+        ],
+        variables: {
+            particles: 200,
+            power: 5, 
+            life: 100
+        }
+    }
+};
+
+// ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+let currentScenario = '';
+let canvas, ctx;
+let animationId;
+
+// Объекты для разных сценариев
+let gravityBalls = [];
+let colorParticles = [];
+let explosionParticles = [];
+
+// ========== УПРАВЛЕНИЕ СЦЕНАРИЯМИ ==========
+
+function startScenario(scenarioKey) {
+    currentScenario = scenarioKey;
+    document.getElementById('scenarioSelection').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    
+    // Загружаем код и задания
+    document.getElementById('codeDisplay').innerHTML = scenarios[scenarioKey].code;
+    
+    const tasksContainer = document.getElementById('tasks');
+    tasksContainer.innerHTML = '<h3>ЗАДАНИЯ:</h3>';
+    
+    scenarios[scenarioKey].tasks.forEach((task, index) => {
+        const taskEl = document.createElement('div');
+        taskEl.className = 'task';
+        taskEl.textContent = `${index + 1}. ${task}`;
+        tasksContainer.appendChild(taskEl);
+    });
+    
+    initializeVisualization();
+    initializeScenario();
+}
+
+function showScenarioSelection() {
+    cancelAnimationFrame(animationId);
+    document.getElementById('scenarioSelection').style.display = 'block';
+    document.getElementById('mainApp').style.display = 'none';
+}
+
+function applyChanges() {
+    const scenario = scenarios[currentScenario];
+    
+    for (const [key, defaultValue] of Object.entries(scenario.variables)) {
+        const element = document.getElementById(key);
+        if (element) {
+            const newValue = parseFloat(element.textContent);
+            if (!isNaN(newValue)) {
+                scenario.variables[key] = newValue;
+            }
+        }
+    }
+    
+    const successMsg = document.getElementById('successMessage');
+    successMsg.style.display = 'block';
+    setTimeout(() => successMsg.style.display = 'none', 2000);
+    
+    initializeScenario();
+}
+
+// ========== ИНИЦИАЛИЗАЦИЯ ВИЗУАЛИЗАЦИИ ==========
+function initializeVisualization() {
+    const visualPanel = document.getElementById('visualPanel');
+    visualPanel.innerHTML = '<canvas id="mainCanvas"></canvas>';
+    
+    canvas = document.getElementById('mainCanvas');
+    ctx = canvas.getContext('2d');
+    
+    canvas.width = visualPanel.clientWidth;
+    canvas.height = visualPanel.clientHeight;
+}
+
+// ========== РЕАЛИЗАЦИЯ СЦЕНАРИЕВ ==========
+
+function initializeScenario() {
+    // Останавливаем предыдущую анимацию
+    if (animationId) cancelAnimationFrame(animationId);
+    
+    gravityBalls = [];
+    colorParticles = [];
+    explosionParticles = [];
+    
+    switch(currentScenario) {
+        case 'gravity':
+            initializeGravityScenario();
+            break;
+        case 'colors':
+            initializeColorsScenario();
+            break;
+        case 'particles':
+            initializeParticlesScenario();
+            break;
+    }
+    
+    animate();
+}
+
+// СЦЕНАРИЙ 1: ГРАВИТАЦИЯ
+function initializeGravityScenario() {
+    for (let i = 0; i < 10; i++) {
+        gravityBalls.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height * 0.3,
+            vx: (Math.random() - 0.5) * 10,
+            vy: 0,
+            color: `hsl(${Math.random() * 360}, 70%, 60%)`
+        });
+    }
+}
+
+function updateGravity() {
+    const vars = scenarios.gravity.variables;
+    
+    gravityBalls.forEach(ball => {
+        // Применяем гравитацию
+        ball.vy += vars.gravity;
+        
+        // Применяем трение
+        ball.vx *= vars.friction;
+        ball.vy *= vars.friction;
+        
+        // Обновляем позицию
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+        
+        // Отскок от границ
+        if (ball.x <= 0 || ball.x >= canvas.width) {
+            ball.vx *= -0.8;
+            ball.x = Math.max(0, Math.min(canvas.width, ball.x));
+        }
+
+        if (ball.y <= 0) {
+            ball.vy *= -0.8;
+            ball.y = 0;
+            ball.vx *= 0.99; // Немного теряем энергию при ударе о потолок
+        }
+        
+        if (ball.y >= canvas.height - vars.ballSize) {
+            ball.vy *= -0.8;
+            ball.y = canvas.height - vars.ballSize;
+            // Немного теряем энергию при ударе об пол
+            ball.vx *= 0.99;
+        }
+    });
+}
+
+function drawGravity() {
+    const vars = scenarios.gravity.variables;
+    
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Рисуем "пол"
+    ctx.fillStyle = '#333';
+    ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
+    
+    gravityBalls.forEach(ball => {
+        ctx.fillStyle = ball.color;
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, vars.ballSize, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Добавляем тень для объёма
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 3;
+    });
+    
+    ctx.shadowColor = 'transparent';
+}
+
+// СЦЕНАРИЙ 2: ЦВЕТНАЯ ИНФЕКЦИЯ
+function initializeColorsScenario() {
+    // Создаем начальную частицу в центре
+    colorParticles.push({
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        vx: 0,
+        vy: 0,
+        age: 0
+    });
+}
+
+function updateColors() {
+    const vars = scenarios.colors.variables;
+    
+    // Создаем новые частицы
+    if (colorParticles.length < vars.count) {
+        for (let i = 0; i < 5; i++) {
+            const source = colorParticles[Math.floor(Math.random() * colorParticles.length)];
+            if (source) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * vars.speed;
+                colorParticles.push({
+                    x: source.x,
+                    y: source.y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    age: 0
+                });
+            }
+        }
+    }
+    
+    // Обновляем существующие частицы
+    colorParticles.forEach(particle => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.age++;
+        
+        // Случайное изменение направления
+        if (Math.random() < 0.1) {
+            particle.vx += (Math.random() - 0.5) * 0.5;
+            particle.vy += (Math.random() - 0.5) * 0.5;
+        }
+    });
+    
+    // Ограничиваем количество частиц
+    if (colorParticles.length > vars.count) {
+        colorParticles = colorParticles.slice(0, vars.count);
+    }
+}
+
+function drawColors() {
+    const vars = scenarios.colors.variables;
+    
+    ctx.fillStyle = 'rgba(26, 26, 26, 0.1)'; // Полупрозрачный для эффекта шлейфа
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    colorParticles.forEach(particle => {
+        const alpha = 1 - (particle.age / 500);
+        if (alpha > 0) {
+            ctx.fillStyle = `rgba(${vars.colorR}, ${Math.sin(particle.age * 0.1) * 127 + 127}, ${Math.cos(particle.age * 0.05) * 127 + 127}, ${alpha})`;
+            ctx.fillRect(particle.x - 2, particle.y - 2, 4, 4);
+        }
+    });
+}
+
+// СЦЕНАРИЙ 3: ЧАСТИЦЫ
+function initializeParticlesScenario() {
+    // Создаем взрыв в центре
+    createExplosion(canvas.width / 2, canvas.height / 2);
+}
+
+function createExplosion(x, y) {
+    const vars = scenarios.particles.variables;
+    
+    for (let i = 0; i < vars.particles; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * vars.power;
+        explosionParticles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: vars.life,
+            maxLife: vars.life,
+            color: `hsl(${Math.random() * 360}, 100%, 60%)`,
+            size: Math.random() * 3 + 1
+        });
+    }
+}
+
+function updateParticles() {
+    const vars = scenarios.particles.variables;
+    
+    explosionParticles.forEach(particle => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vy += 0.1; // Гравитация
+        particle.life--;
+        
+        // Замедление
+        particle.vx *= 0.99;
+        particle.vy *= 0.99;
+    });
+    
+    // Удаляем мёртвые частицы
+    explosionParticles = explosionParticles.filter(p => p.life > 0);
+    
+    // Создаем новые взрывы если частиц мало
+    if (explosionParticles.length < vars.particles * 0.1 && Math.random() < 0.02) {
+        createExplosion(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height * 0.5
+        );
+    }
+}
+
+function drawParticles() {
+    ctx.fillStyle = 'rgba(26, 26, 26, 0.2)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    explosionParticles.forEach(particle => {
+        const lifeRatio = particle.life / particle.maxLife;
+        ctx.globalAlpha = lifeRatio;
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * lifeRatio, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    
+    ctx.globalAlpha = 1;
+}
+
+// ========== ГЛАВНЫЙ ЦИКЛ АНИМАЦИИ ==========
+function animate() {
+    // Очищаем canvas
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Обновляем и рисуем в зависимости от сценария
+    switch(currentScenario) {
+        case 'gravity':
+            updateGravity();
+            drawGravity();
+            break;
+        case 'colors':
+            updateColors();
+            drawColors();
+            break;
+        case 'particles':
+            updateParticles();
+            drawParticles();
+            break;
+    }
+    
+    animationId = requestAnimationFrame(animate);
+}
+
+// ========== ДЕЛАЕМ ЭЛЕМЕНТЫ РЕДАКТИРУЕМЫМИ ==========
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('editable')) {
+        const newValue = prompt('Введи новое значение:', e.target.textContent);
+        if (newValue !== null) {
+            e.target.textContent = newValue;
+        }
+    }
+});
+
+// Адаптируем размер canvas при изменении размера окна
+window.addEventListener('resize', function() {
+    if (canvas) {
+        const visualPanel = document.getElementById('visualPanel');
+        canvas.width = visualPanel.clientWidth;
+        canvas.height = visualPanel.clientHeight;
+        initializeScenario();
+    }
+});
+</script>
+
+</body>
+</html>
