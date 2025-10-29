@@ -1,48 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Стань программистом за 60 секунд!</title>
     <style>
-       body { 
-    margin: 0; 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: #1a1a1a;
-    color: white;
-    overflow: hidden;
-}
-
-#codePanel { 
-    width: 40%; 
-    padding: 25px; 
-    background: #2d2d2d; 
-    color: #f8f8f2;
-    font-family: 'Courier New', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 14px; /* Чуть уменьшаем для мобильных */
-    height: 100vh;
-    overflow-y: auto;
-    box-sizing: border-box;
-    border-right: 3px solid #007acc;
-}
-
-/* Добавляем медиа-запрос для мобильных */
-@media (max-width: 768px) {
-    #codePanel {
-        font-size: 12px;
-        padding: 15px;
-    }
-    
-    .editable {
-        padding: 2px 6px;
-        font-size: 12px;
-    }
-    
-    button {
-        padding: 10px 16px;
-        font-size: 14px;
-    }
-}
+        body { 
+            margin: 0; 
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            overflow: hidden;
+        }
         
-        /* Выблор игры */
+        #codePanel { 
+            width: 40%; 
+            padding: 25px; 
+            background: #2d2d2d; 
+            color: #f8f8f2;
+            font-size: 16px;
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+            border-right: 3px solid #007acc;
+        }
+        
+        /* Выбор игры */
         #scenarioSelection {
             text-align: center;
             padding: 50px;
@@ -79,19 +62,6 @@
         #mainApp { 
             display: none; 
             height: 100vh;
-        }
-        
-        #codePanel { 
-            width: 40%; 
-            padding: 25px; 
-            background: #2d2d2d; 
-            color: #f8f8f2;
-            font-family: 'Courier New', monospace; 
-            font-size: 16px;
-            height: 100vh;
-            overflow-y: auto;
-            box-sizing: border-box;
-            border-right: 3px solid #007acc;
         }
         
         #visualPanel { 
@@ -152,6 +122,21 @@
             margin: 10px 0;
             display: none;
         }
+
+        .error-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #5a2d2d;
+            color: #ff9090;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff4444;
+            z-index: 10000;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -165,19 +150,19 @@
         <div class="scenario-card" onclick="startScenario('gravity')">
             <h2>ГРАВИТАЦИЯ</h2>
             <p>Управляй физикой шариков! Меняй гравитацию и трение</p>
-            <div style="font-size: 3em; margin: 15px 0;"></div>
+            <div style="font-size: 3em; margin: 15px 0;">⚡</div>
         </div>
         
         <div class="scenario-card" onclick="startScenario('colors')">
             <h2>ЦВЕТНАЯ ИНФЕКЦИЯ</h2>
             <p>Создай вирусный визуальный эффект!</p>
-            <div style="font-size: 3em; margin: 15px 0;"></div>
+            <div style="font-size: 3em; margin: 15px 0;">🎨</div>
         </div>
         
         <div class="scenario-card" onclick="startScenario('particles')">
             <h2>ЧАСТИЦЫ</h2>
             <p>Управляй тысячами частиц!</p>
-            <div style="font-size: 3em; margin: 15px 0;"></div>
+            <div style="font-size: 3em; margin: 15px 0;">✨</div>
         </div>
     </div>
 </div>
@@ -196,7 +181,7 @@
             <h3>ЗАДАНИЯ:</h3>
         </div>
         
-        <button onclick="applyChanges()">ЗАПУСТИТЬ ИЗМЕНЕНИЯ!</button>
+        <button onclick="applyChanges()"> ЗАПУСТИТЬ ИЗМЕНЕНИЯ!</button>
         <button onclick="showScenarioSelection()">← ВЫБРАТЬ ДРУГОЙ СЦЕНАРИЙ</button>
     </div>
     <div id="visualPanel">
@@ -204,7 +189,77 @@
     </div>
 </div>
 
+<div class="error-message" id="errorMessage"></div>
+
 <script>
+// ========== СИСТЕМА ВАЛИДАЦИИ И ЗАЩИТЫ ==========
+const ValidationSystem = {
+    limits: {
+        gravity: { min: -10, max: 10 },
+        friction: { min: 0.5, max: 0.9999 },
+        ballSize: { min: 5, max: 200 },
+        count: { min: 1, max: 1000 },
+        speed: { min: 0.1, max: 20 },
+        colorR: { min: 0, max: 255 },
+        particles: { min: 1, max: 2000 },
+        power: { min: 0.1, max: 50 },
+        life: { min: 10, max: 1000 }
+    },
+
+    validateValue(field, value) {
+        const limit = this.limits[field];
+        if (!limit) return parseFloat(value) || 0;
+
+        let numValue = parseFloat(value);
+        
+        if (isNaN(numValue)) {
+            this.showError(`"${value}" - это не число!`);
+            return limit.min;
+        }
+
+        if (numValue < limit.min) {
+            this.showError(`Слишком маленькое значение! Минимум: ${limit.min}`);
+            numValue = limit.min;
+        } else if (numValue > limit.max) {
+            this.showError(`Слишком большое значение! Максимум: ${limit.max}`);
+            numValue = limit.max;
+        }
+
+        return numValue;
+    },
+
+    showError(message) {
+        const errorContainer = document.getElementById('errorMessage');
+        errorContainer.textContent = `⚠️ ${message}`;
+        errorContainer.style.display = 'block';
+
+        setTimeout(() => {
+            errorContainer.style.display = 'none';
+        }, 3000);
+    },
+
+    safeApplyChanges(scenario) {
+        const changes = {};
+        let hasChanges = false;
+
+        for (const [key, defaultValue] of Object.entries(scenario.variables)) {
+            const element = document.getElementById(key);
+            if (element) {
+                const validatedValue = this.validateValue(key, element.textContent);
+                const currentValue = scenario.variables[key];
+                
+                if (validatedValue !== currentValue) {
+                    scenario.variables[key] = validatedValue;
+                    element.textContent = validatedValue;
+                    changes[key] = validatedValue;
+                    hasChanges = true;
+                }
+            }
+        }
+
+        return { changes, hasChanges };
+    }
+};
 
 const scenarios = {
     gravity: {
@@ -214,9 +269,10 @@ const scenarios = {
   ballSize = <span class="editable" id="ballSize">30</span>;
 }`,
         tasks: [
-            "СДЕЛАЙ НЕВЕСОМОСТЬ!",
-            "СДЕЛАЙ СУПЕР-ГРАВИТАЦИЮ!", 
-            "СДЕЛАЙ ВАКУУМ!"
+            "СДЕЛАЙ НЕВЕСОМОСТЬ! (0.1)",
+            "СДЕЛАЙ СУПЕР-ГРАВИТАЦИЮ! (2.0)", 
+            "СДЕЛАЙ ВАКУУМ! (0.999)",
+            "ПОПРОБУЙ ОТРИЦАТЕЛЬНУЮ ГРАВИТАЦИЮ! (-1.0)"
         ],
         variables: {
             gravity: 0.5,
@@ -232,9 +288,9 @@ const scenarios = {
   color = [<span class="editable" id="colorR">255</span>, 0, 0];
 }`,
         tasks: [
-            "ЗАРАЗИ ВЕСЬ ЭКРАН!",
-            "СУПЕР-СКОРОСТЬ!", 
-            "СМЕНИ ЦВЕТ!"
+            "ЗАРАЗИ ВЕСЬ ЭКРАН! (500)",
+            "СУПЕР-СКОРОСТЬ! (8)", 
+            "СМЕНИ ЦВЕТ! (0-255)"
         ],
         variables: {
             count: 100,
@@ -250,9 +306,9 @@ const scenarios = {
   lifeTime = <span class="editable" id="life">100</span>;
 }`,
         tasks: [
-            "ИЗМЕНИ КОЛИЧЕСТВО ТОЧЕК",
-            "СДЕЛАЙ ВЗРЫВ СИЛЬНЕЕ",
-            "СДЕЛАЙ, ЧТО БЫ ЧАСТИЦЫ ЖИЛИ ДОЛЬШЕ"
+            "МЕГА ВЗРЫВ! (1000)",
+            "СУПЕР СИЛА! (15)",
+            "ВЕЧНЫЕ ЧАСТИЦЫ! (500)"
         ],
         variables: {
             particles: 200,
@@ -267,7 +323,6 @@ let currentScenario = '';
 let canvas, ctx;
 let animationId;
 
-// Объекты для разных сценариев
 let gravityBalls = [];
 let colorParticles = [];
 let explosionParticles = [];
@@ -279,7 +334,6 @@ function startScenario(scenarioKey) {
     document.getElementById('scenarioSelection').style.display = 'none';
     document.getElementById('mainApp').style.display = 'flex';
     
-    // Загружаем код и задания
     document.getElementById('codeDisplay').innerHTML = scenarios[scenarioKey].code;
     
     const tasksContainer = document.getElementById('tasks');
@@ -305,21 +359,19 @@ function showScenarioSelection() {
 function applyChanges() {
     const scenario = scenarios[currentScenario];
     
-    for (const [key, defaultValue] of Object.entries(scenario.variables)) {
-        const element = document.getElementById(key);
-        if (element) {
-            const newValue = parseFloat(element.textContent);
-            if (!isNaN(newValue)) {
-                scenario.variables[key] = newValue;
-            }
-        }
+    const { changes, hasChanges } = ValidationSystem.safeApplyChanges(scenario);
+    
+    if (hasChanges) {
+        const successMsg = document.getElementById('successMessage');
+        successMsg.textContent = '✅ Изменения безопасно применены!';
+        successMsg.style.display = 'block';
+        
+        setTimeout(() => {
+            successMsg.style.display = 'none';
+        }, 2000);
+        
+        initializeScenario();
     }
-    
-    const successMsg = document.getElementById('successMessage');
-    successMsg.style.display = 'block';
-    setTimeout(() => successMsg.style.display = 'none', 2000);
-    
-    initializeScenario();
 }
 
 // ========== ИНИЦИАЛИЗАЦИЯ ВИЗУАЛИЗАЦИИ ==========
@@ -337,7 +389,6 @@ function initializeVisualization() {
 // ========== РЕАЛИЗАЦИЯ СЦЕНАРИЕВ ==========
 
 function initializeScenario() {
-    // Останавливаем предыдущую анимацию
     if (animationId) cancelAnimationFrame(animationId);
     
     gravityBalls = [];
@@ -361,11 +412,14 @@ function initializeScenario() {
 
 // СЦЕНАРИЙ 1: ГРАВИТАЦИЯ
 function initializeGravityScenario() {
-    for (let i = 0; i < 10; i++) {
+    const vars = scenarios.gravity.variables;
+    const safeBallCount = Math.min(15, Math.max(5, vars.ballSize > 100 ? 5 : 10));
+    
+    for (let i = 0; i < safeBallCount; i++) {
         gravityBalls.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height * 0.3,
-            vx: (Math.random() - 0.5) * 10,
+            vx: (Math.random() - 0.5) * 8,
             vy: 0,
             color: `hsl(${Math.random() * 360}, 70%, 60%)`
         });
@@ -376,18 +430,12 @@ function updateGravity() {
     const vars = scenarios.gravity.variables;
     
     gravityBalls.forEach(ball => {
-        // Применяем гравитацию
         ball.vy += vars.gravity;
-        
-        // Применяем трение
         ball.vx *= vars.friction;
         ball.vy *= vars.friction;
-        
-        // Обновляем позицию
         ball.x += ball.vx;
         ball.y += ball.vy;
         
-        // Отскок от границ
         if (ball.x <= 0 || ball.x >= canvas.width) {
             ball.vx *= -0.8;
             ball.x = Math.max(0, Math.min(canvas.width, ball.x));
@@ -396,13 +444,12 @@ function updateGravity() {
         if (ball.y <= 0) {
             ball.vy *= -0.8;
             ball.y = 0;
-            ball.vx *= 0.99; // Немного теряем энергию при ударе о потолок
+            ball.vx *= 0.99;
         }
         
         if (ball.y >= canvas.height - vars.ballSize) {
             ball.vy *= -0.8;
             ball.y = canvas.height - vars.ballSize;
-            // Немного теряем энергию при ударе об пол
             ball.vx *= 0.99;
         }
     });
@@ -414,7 +461,11 @@ function drawGravity() {
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Рисуем "пол"
+    // Потолок
+    ctx.fillStyle = '#444';
+    ctx.fillRect(0, 0, canvas.width, 10);
+    
+    // Пол
     ctx.fillStyle = '#333';
     ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
     
@@ -424,7 +475,6 @@ function drawGravity() {
         ctx.arc(ball.x, ball.y, vars.ballSize, 0, Math.PI * 2);
         ctx.fill();
         
-        // Добавляем тень для объёма
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 10;
         ctx.shadowOffsetX = 3;
@@ -436,7 +486,6 @@ function drawGravity() {
 
 // СЦЕНАРИЙ 2: ЦВЕТНАЯ ИНФЕКЦИЯ
 function initializeColorsScenario() {
-    // Создаем начальную частицу в центре
     colorParticles.push({
         x: canvas.width / 2,
         y: canvas.height / 2,
@@ -449,13 +498,14 @@ function initializeColorsScenario() {
 function updateColors() {
     const vars = scenarios.colors.variables;
     
-    // Создаем новые частицы
-    if (colorParticles.length < vars.count) {
-        for (let i = 0; i < 5; i++) {
+    const maxNewParticles = Math.min(5, Math.floor(vars.count * 0.1));
+    
+    if (colorParticles.length < vars.count && colorParticles.length > 0) {
+        for (let i = 0; i < maxNewParticles; i++) {
             const source = colorParticles[Math.floor(Math.random() * colorParticles.length)];
             if (source) {
                 const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * vars.speed;
+                const speed = Math.random() * Math.min(vars.speed, 10);
                 colorParticles.push({
                     x: source.x,
                     y: source.y,
@@ -463,33 +513,34 @@ function updateColors() {
                     vy: Math.sin(angle) * speed,
                     age: 0
                 });
+                
+                if (colorParticles.length >= vars.count) break;
             }
         }
     }
     
-    // Обновляем существующие частицы
-    colorParticles.forEach(particle => {
+    for (let i = colorParticles.length - 1; i >= 0; i--) {
+        const particle = colorParticles[i];
         particle.x += particle.vx;
         particle.y += particle.vy;
         particle.age++;
         
-        // Случайное изменение направления
-        if (Math.random() < 0.1) {
-            particle.vx += (Math.random() - 0.5) * 0.5;
-            particle.vy += (Math.random() - 0.5) * 0.5;
+        if (particle.age > 500) {
+            colorParticles.splice(i, 1);
+            continue;
         }
-    });
-    
-    // Ограничиваем количество частиц
-    if (colorParticles.length > vars.count) {
-        colorParticles = colorParticles.slice(0, vars.count);
+        
+        if (Math.random() < 0.05) {
+            particle.vx += (Math.random() - 0.5) * 0.3;
+            particle.vy += (Math.random() - 0.5) * 0.3;
+        }
     }
 }
 
 function drawColors() {
     const vars = scenarios.colors.variables;
     
-    ctx.fillStyle = 'rgba(26, 26, 26, 0.1)'; // Полупрозрачный для эффекта шлейфа
+    ctx.fillStyle = 'rgba(26, 26, 26, 0.1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     colorParticles.forEach(particle => {
@@ -503,16 +554,17 @@ function drawColors() {
 
 // СЦЕНАРИЙ 3: ЧАСТИЦЫ
 function initializeParticlesScenario() {
-    // Создаем взрыв в центре
     createExplosion(canvas.width / 2, canvas.height / 2);
 }
 
 function createExplosion(x, y) {
     const vars = scenarios.particles.variables;
     
-    for (let i = 0; i < vars.particles; i++) {
+    const safeParticleCount = Math.min(vars.particles, 500);
+    
+    for (let i = 0; i < safeParticleCount; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * vars.power;
+        const speed = Math.random() * Math.min(vars.power, 20);
         explosionParticles.push({
             x: x,
             y: y,
@@ -521,7 +573,7 @@ function createExplosion(x, y) {
             life: vars.life,
             maxLife: vars.life,
             color: `hsl(${Math.random() * 360}, 100%, 60%)`,
-            size: Math.random() * 3 + 1
+            size: Math.random() * 2 + 1
         });
     }
 }
@@ -529,22 +581,30 @@ function createExplosion(x, y) {
 function updateParticles() {
     const vars = scenarios.particles.variables;
     
-    explosionParticles.forEach(particle => {
+    const maxTotalParticles = 2000;
+    if (explosionParticles.length > maxTotalParticles) {
+        explosionParticles = explosionParticles.slice(-maxTotalParticles);
+    }
+    
+    for (let i = explosionParticles.length - 1; i >= 0; i--) {
+        const particle = explosionParticles[i];
         particle.x += particle.vx;
         particle.y += particle.vy;
-        particle.vy += 0.1; // Гравитация
+        particle.vy += 0.1;
         particle.life--;
         
-        // Замедление
+        if (particle.life <= 0) {
+            explosionParticles.splice(i, 1);
+            continue;
+        }
+        
         particle.vx *= 0.99;
         particle.vy *= 0.99;
-    });
+    }
     
-    // Удаляем мёртвые частицы
-    explosionParticles = explosionParticles.filter(p => p.life > 0);
-    
-    // Создаем новые взрывы если частиц мало
-    if (explosionParticles.length < vars.particles * 0.1 && Math.random() < 0.02) {
+    if (explosionParticles.length < vars.particles * 0.1 && 
+        Math.random() < 0.01 && 
+        explosionParticles.length < 1500) {
         createExplosion(
             Math.random() * canvas.width,
             Math.random() * canvas.height * 0.5
@@ -570,40 +630,54 @@ function drawParticles() {
 
 // ========== ГЛАВНЫЙ ЦИКЛ АНИМАЦИИ ==========
 function animate() {
-    // Очищаем canvas
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Обновляем и рисуем в зависимости от сценария
-    switch(currentScenario) {
-        case 'gravity':
-            updateGravity();
-            drawGravity();
-            break;
-        case 'colors':
-            updateColors();
-            drawColors();
-            break;
-        case 'particles':
-            updateParticles();
-            drawParticles();
-            break;
+    try {
+        switch(currentScenario) {
+            case 'gravity':
+                updateGravity();
+                drawGravity();
+                break;
+            case 'colors':
+                updateColors();
+                drawColors();
+                break;
+            case 'particles':
+                updateParticles();
+                drawParticles();
+                break;
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        ValidationSystem.showError('Ошибка! Перезапускаем...');
+        initializeScenario();
     }
     
     animationId = requestAnimationFrame(animate);
 }
 
-// ========== ДЕЛАЕМ ЭЛЕМЕНТЫ РЕДАКТИРУЕМЫМИ ==========
+// ========== РЕДАКТИРОВАНИЕ ==========
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('editable')) {
-        const newValue = prompt('Введи новое значение:', e.target.textContent);
+        const fieldId = e.target.id;
+        const currentValue = e.target.textContent;
+        const limit = ValidationSystem.limits[fieldId];
+        
+        let message = `Введи новое значение для ${fieldId}:`;
+        if (limit) {
+            message += `\n(от ${limit.min} до ${limit.max})`;
+        }
+        
+        const newValue = prompt(message, currentValue);
         if (newValue !== null) {
-            e.target.textContent = newValue;
+            const validatedValue = ValidationSystem.validateValue(fieldId, newValue);
+            e.target.textContent = validatedValue;
         }
     }
 });
 
-// Адаптируем размер canvas при изменении размера окна
+// Адаптация размера
 window.addEventListener('resize', function() {
     if (canvas) {
         const visualPanel = document.getElementById('visualPanel');
