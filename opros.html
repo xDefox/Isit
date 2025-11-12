@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кто ты в IT?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #1a365d;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .quiz-title {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #2d3748;
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        .question-number {
+            color: #2d3748;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .question-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            line-height: 1.3;
+            text-align: center;
+        }
+
+        .options-container {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: #4a5568;
+            text-align: center;
+        }
+
+        .option:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        .option.selected {
+            background: #2d3748;
+            color: white;
+            border-color: #2d3748;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+
+        .btn-prev {
+            background: #718096;
+            color: white;
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: #4a5568;
+        }
+
+        .btn-next {
+            background: #2d3748;
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background: #1a202c;
+        }
+
+        button:disabled {
+            background: #e2e8f0;
+            color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-container {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .result-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 12px;
+        }
+
+        .result-description {
+            color: #4a5568;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .restart-btn {
+            background: #2d3748;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .restart-btn:hover {
+            background: #1a202c;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #cbd5e0;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-title">Кто ты в IT?</div>
+    
+    <div class="quiz-container">
+        <div class="progress-bar" id="progressBar"></div>
+        
+        <!-- Вопрос 1 -->
+        <div class="question-container active" id="question1">
+            <div class="question-number">Вопрос 1/15</div>
+            <div class="question-text">Мне нравится разбираться, как устроены механизмы и приборы</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Точно нет</div>
+                <div class="option" data-value="2">Скорее нет</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Скорее да</div>
+                <div class="option" data-value="5">Точно да</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()" disabled>Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 2 -->
+        <div class="question-container" id="question2">
+            <div class="question-number">Вопрос 2/15</div>
+            <div class="question-text">Когда что-то ломается, я пытаюсь починить сам, а не жду помощи</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Точно нет</div>
+                <div class="option" data-value="2">Скорее нет</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Скорее да</div>
+                <div class="option" data-value="5">Всегда да</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 3 -->
+        <div class="question-container" id="question3">
+            <div class="question-number">Вопрос 3/15</div>
+            <div class="question-text">Мне интересно, как работают компьютерные программы и приложения</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Совсем нет</div>
+                <div class="option" data-value="2">Редко</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Часто</div>
+                <div class="option" data-value="5">Очень интересно</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 4 -->
+        <div class="question-container" id="question4">
+            <div class="question-number">Вопрос 4/15</div>
+            <div class="question-text">Я обращаю внимание на то, насколько красиво и удобно выглядит сайт или приложение</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Никогда</div>
+                <div class="option" data-value="2">Редко</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Часто</div>
+                <div class="option" data-value="5">Всегда</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 5 -->
+        <div class="question-container" id="question5">
+            <div class="question-number">Вопрос 5/15</div>
+            <div class="question-text">Мне нравится подбирать цвета, шрифты и оформление для своих проектов</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Совсем нет</div>
+                <div class="option" data-value="2">Скорее нет</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Скорее да</div>
+                <div class="option" data-value="5">Точно да</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 6 -->
+        <div class="question-container" id="question6">
+            <div class="question-number">Вопрос 6/15</div>
+            <div class="question-text">Я замечаю, когда элемент интерфейса расположен неудобно или некрасиво</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Никогда</div>
+                <div class="option" data-value="2">Редко</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Часто</div>
+                <div class="option" data-value="5">Постоянно</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 7 -->
+        <div class="question-container" id="question7">
+            <div class="question-number">Вопрос 7/15</div>
+            <div class="question-text">Мне нравится находить закономерности и связи между разными вещами</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Точно нет</div>
+                <div class="option" data-value="2">Скорее нет</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Скорее да</div>
+                <div class="option" data-value="5">Точно да</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 8 -->
+        <div class="question-container" id="question8">
+            <div class="question-number">Вопрос 8/15</div>
+            <div class="question-text">Прежде чем принять решение, я люблю проанализировать все варианты</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Никогда</div>
+                <div class="option" data-value="2">Редко</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Часто</div>
+                <div class="option" data-value="5">Всегда</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 9 -->
+        <div class="question-container" id="question9">
+            <div class="question-number">Вопрос 9/15</div>
+            <div class="question-text">Мне нравится работать с цифрами, таблицами и графиками</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Совсем нет</div>
+                <div class="option" data-value="2">Скорее нет</div>
+                <div class="option" data-value="3">Нейтрально</div>
+                <div class="option" data-value="4">Скорее да</div>
+                <div class="option" data-value="5">Очень нравится</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 10 -->
+        <div class="question-container" id="question10">
+            <div class="question-number">Вопрос 10/15</div>
+            <div class="question-text">Мне легко находить общий язык с новыми людьми</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Очень сложно</div>
+                <div class="option" data-value="2">Сложно</div>
+                <div class="option" data-value="3">Нормально</div>
+                <div class="option" data-value="4">Легко</div>
+                <div class="option" data-value="5">Очень легко</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 11 -->
+        <div class="question-container" id="question11">
+            <div class="question-number">Вопрос 11/15</div>
+            <div class="question-text">Я умею объяснять сложные вещи простыми словами</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Точно нет</div>
+                <div class="option" data-value="2">Скорее нет</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Скорее да</div>
+                <div class="option" data-value="5">Точно да</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 12 -->
+        <div class="question-container" id="question12">
+            <div class="question-number">Вопрос 12/15</div>
+            <div class="question-text">Мне нравится работать в команде и распределять задачи</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Совсем нет</div>
+                <div class="option" data-value="2">Скорее нет</div>
+                <div class="option" data-value="3">Нейтрально</div>
+                <div class="option" data-value="4">Скорее да</div>
+                <div class="option" data-value="5">Очень нравится</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 13 -->
+        <div class="question-container" id="question13">
+            <div class="question-number">Вопрос 13/15</div>
+            <div class="question-text">Мне нравится решать головоломки и логические задачи</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Никогда</div>
+                <div class="option" data-value="2">Редко</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Часто</div>
+                <div class="option" data-value="5">Постоянно</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 14 -->
+        <div class="question-container" id="question14">
+            <div class="question-number">Вопрос 14/15</div>
+            <div class="question-text">Я быстро осваиваю новые программы и приложения</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Очень медленно</div>
+                <div class="option" data-value="2">Медленно</div>
+                <div class="option" data-value="3">Средне</div>
+                <div class="option" data-value="4">Быстро</div>
+                <div class="option" data-value="5">Очень быстро</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вопрос 15 -->
+        <div class="question-container" id="question15">
+            <div class="question-number">Вопрос 15/15</div>
+            <div class="question-text">Мне интересно создавать что-то новое с помощью технологий</div>
+            <div class="options-container">
+                <div class="option" data-value="1">Совсем нет</div>
+                <div class="option" data-value="2">Скорее нет</div>
+                <div class="option" data-value="3">Иногда</div>
+                <div class="option" data-value="4">Скорее да</div>
+                <div class="option" data-value="5">Точно да</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevQuestion()">Назад</button>
+                <button class="btn-next" onclick="nextQuestion()">Завершить</button>
+            </div>
+        </div>
+
+        <!-- Результат -->
+        <div class="result-container" id="resultContainer">
+            <div class="result-icon" id="resultIcon">🎯</div>
+            <div class="result-title" id="resultTitle">Ваш профиль</div>
+            <div class="result-description" id="resultDescription"></div>
+            <button class="restart-btn" onclick="restartQuiz()">Пройти ещё раз</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        ВГТУ © Кафедра ИсИТ © 2025
+    </div>
+
+    <script>
+        let currentQuestion = 0;
+        const totalQuestions = 15;
+        let answers = new Array(totalQuestions).fill(0);
+
+        // Веса вопросов для разных профилей
+        const questionWeights = {
+            'developer': [1, 1, 1, 0, 0, 0, 0.5, 0.5, 0.5, 0, 0, 0, 1, 1, 0.5],
+            'designer': [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            'analyst': [0.5, 0, 0.5, 0, 0, 0, 1, 1, 1, 0, 0.5, 0, 0.5, 0.5, 0],
+            'manager': [0, 0, 0, 0, 0, 0, 0, 0.5, 0, 1, 1, 1, 0, 0, 0]
+        };
+
+        const profiles = {
+            'developer': {
+                title: '💻 Разработчик',
+                description: 'Вы любите разбираться в технике, решать логические задачи и быстро осваиваете новые технологии. В IT вас может заинтересовать программирование, создание приложений и работа с кодом.',
+                icon: '💻'
+            },
+            'designer': {
+                title: '🎨 Дизайнер',
+                description: 'Вы обращаете внимание на красоту и удобство, обладаете хорошим вкусом и любите творить. В IT вам подойдут направления веб-дизайна, UI/UX дизайна и создания интерфейсов.',
+                icon: '🎨'
+            },
+            'analyst': {
+                title: '📊 Аналитик',
+                description: 'Вы умеете находить закономерности, анализировать данные и принимать взвешенные решения. В IT вас ждут в бизнес-аналитике, data science и системном анализе.',
+                icon: '📊'
+            },
+            'manager': {
+                title: '👨‍💼 Менеджер проектов',
+                description: 'Вы легко находите общий язык с людьми, умеете объяснять сложное простыми словами и организовывать работу. В IT вам подойдет управление проектами и командами.',
+                icon: '👨‍💼'
+            }
+        };
+
+        // Инициализация викторины
+        function initQuiz() {
+            updateProgress();
+            setupOptionListeners();
+        }
+
+        // Настройка обработчиков для вариантов ответов
+        function setupOptionListeners() {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Снимаем выделение с других вариантов
+                    const siblings = this.parentElement.children;
+                    for (let sibling of siblings) {
+                        sibling.classList.remove('selected');
+                    }
+                    // Выделяем текущий вариант
+                    this.classList.add('selected');
+                    
+                    // Сохраняем ответ
+                    const questionContainer = this.closest('.question-container');
+                    if (questionContainer) {
+                        const questionId = questionContainer.id;
+                        const questionIndex = parseInt(questionId.replace('question', '')) - 1;
+                        answers[questionIndex] = parseInt(this.dataset.value);
+                    }
+                });
+            });
+        }
+
+        // Следующий вопрос
+        function nextQuestion() {
+            // Проверяем, выбран ли ответ
+            const currentContainer = document.getElementById(`question${currentQuestion + 1}`);
+            const selectedOption = currentContainer.querySelector('.option.selected');
+            
+            if (!selectedOption && currentQuestion < totalQuestions - 1) {
+                alert('Пожалуйста, выберите ответ перед продолжением!');
+                return;
+            }
+
+            if (currentQuestion < totalQuestions - 1) {
+                document.getElementById(`question${currentQuestion + 1}`).classList.remove('active');
+                currentQuestion++;
+                document.getElementById(`question${currentQuestion + 1}`).classList.add('active');
+                updateProgress();
+                updateNavButtons();
+            } else {
+                showResults();
+            }
+        }
+
+        // Предыдущий вопрос
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                document.getElementById(`question${currentQuestion + 1}`).classList.remove('active');
+                currentQuestion--;
+                document.getElementById(`question${currentQuestion + 1}`).classList.add('active');
+                updateProgress();
+                updateNavButtons();
+            }
+        }
+
+        // Обновление прогресса
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        // Обновление кнопок навигации
+        function updateNavButtons() {
+            const prevBtn = document.querySelector('.btn-prev');
+            const nextBtn = document.querySelector('.btn-next');
+            
+            if (prevBtn) prevBtn.disabled = currentQuestion === 0;
+            if (nextBtn) {
+                if (currentQuestion === totalQuestions - 1) {
+                    nextBtn.textContent = 'Завершить';
+                } else {
+                    nextBtn.textContent = 'Далее';
+                }
+            }
+        }
+
+        // Показ результатов
+        function showResults() {
+            // Проверяем, ответил ли пользователь на последний вопрос
+            const lastContainer = document.getElementById(`question${totalQuestions}`);
+            const lastSelected = lastContainer.querySelector('.option.selected');
+            
+            if (!lastSelected) {
+                alert('Пожалуйста, ответьте на последний вопрос!');
+                return;
+            }
+
+            document.getElementById(`question${currentQuestion + 1}`).classList.remove('active');
+            
+            // Подсчет результатов
+            const scores = {
+                'developer': 0,
+                'designer': 0,
+                'analyst': 0,
+                'manager': 0
+            };
+
+            for (let i = 0; i < answers.length; i++) {
+                for (const profile in questionWeights) {
+                    scores[profile] += answers[i] * questionWeights[profile][i];
+                }
+            }
+
+            // Определение профиля с максимальным score
+            let maxScore = 0;
+            let userProfile = 'developer';
+            
+            for (const profile in scores) {
+                if (scores[profile] > maxScore) {
+                    maxScore = scores[profile];
+                    userProfile = profile;
+                }
+            }
+
+            // Показ результата
+            document.getElementById('resultIcon').textContent = profiles[userProfile].icon;
+            document.getElementById('resultTitle').textContent = profiles[userProfile].title;
+            document.getElementById('resultDescription').textContent = profiles[userProfile].description;
+            document.getElementById('resultContainer').style.display = 'block';
+        }
+
+        // Перезапуск викторины
+        function restartQuiz() {
+            currentQuestion = 0;
+            answers = new Array(totalQuestions).fill(0);
+            document.getElementById('resultContainer').style.display = 'none';
+            
+            // Сбрасываем все вопросы
+            for (let i = 1; i <= totalQuestions; i++) {
+                document.getElementById(`question${i}`).classList.remove('active');
+            }
+            
+            document.getElementById('question1').classList.add('active');
+            updateProgress();
+            updateNavButtons();
+            
+            // Сброс выбранных вариантов
+            const selectedOptions = document.querySelectorAll('.option.selected');
+            selectedOptions.forEach(option => {
+                option.classList.remove('selected');
+            });
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', initQuiz);
+    </script>
+</body>
+</html>

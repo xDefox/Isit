@@ -167,7 +167,7 @@
     </div>
 </div>
 
-<!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
+<!-- ОСНОВА -->
 <div id="mainApp">
     <div id="codePanel">
         <h2>ТВОЙ ПЕРВЫЙ КОД:</h2>
@@ -192,7 +192,7 @@
 <div class="error-message" id="errorMessage"></div>
 
 <script>
-// ========== СИСТЕМА ВАЛИДАЦИИ И ЗАЩИТЫ ==========
+// ВАЛИДАЦИЯ
 const ValidationSystem = {
     limits: {
         gravity: { min: -10, max: 10 },
@@ -318,7 +318,6 @@ const scenarios = {
     }
 };
 
-// ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
 let currentScenario = '';
 let canvas, ctx;
 let animationId;
@@ -327,7 +326,7 @@ let gravityBalls = [];
 let colorParticles = [];
 let explosionParticles = [];
 
-// ========== УПРАВЛЕНИЕ СЦЕНАРИЯМИ ==========
+//  УПРАВЛЕНИЕ СЦЕНАРИЯМИ 
 
 function startScenario(scenarioKey) {
     currentScenario = scenarioKey;
@@ -363,7 +362,7 @@ function applyChanges() {
     
     if (hasChanges) {
         const successMsg = document.getElementById('successMessage');
-        successMsg.textContent = '✅ Изменения безопасно применены!';
+        successMsg.textContent = '✅ Изменения применены!';
         successMsg.style.display = 'block';
         
         setTimeout(() => {
@@ -374,7 +373,7 @@ function applyChanges() {
     }
 }
 
-// ========== ИНИЦИАЛИЗАЦИЯ ВИЗУАЛИЗАЦИИ ==========
+//ИНИЦИАЛИЗАЦИЯ ВИЗУАЛИЗАЦИИ
 function initializeVisualization() {
     const visualPanel = document.getElementById('visualPanel');
     visualPanel.innerHTML = '<canvas id="mainCanvas"></canvas>';
@@ -386,7 +385,7 @@ function initializeVisualization() {
     canvas.height = visualPanel.clientHeight;
 }
 
-// ========== РЕАЛИЗАЦИЯ СЦЕНАРИЕВ ==========
+//РЕАЛИЗАЦИЯ СЦЕНАРИЕВ 
 
 function initializeScenario() {
     if (animationId) cancelAnimationFrame(animationId);
@@ -410,7 +409,7 @@ function initializeScenario() {
     animate();
 }
 
-// СЦЕНАРИЙ 1: ГРАВИТАЦИЯ
+//ГРАВИТАЦИЯ
 function initializeGravityScenario() {
     const vars = scenarios.gravity.variables;
     const safeBallCount = Math.min(15, Math.max(5, vars.ballSize > 100 ? 5 : 10));
@@ -484,7 +483,7 @@ function drawGravity() {
     ctx.shadowColor = 'transparent';
 }
 
-// СЦЕНАРИЙ 2: ЦВЕТНАЯ ИНФЕКЦИЯ
+// ЦВЕТНАЯ ИНФЕКЦИЯ
 function initializeColorsScenario() {
     colorParticles.push({
         x: canvas.width / 2,
@@ -552,7 +551,7 @@ function drawColors() {
     });
 }
 
-// СЦЕНАРИЙ 3: ЧАСТИЦЫ
+// ЧАСТИЦЫ
 function initializeParticlesScenario() {
     createExplosion(canvas.width / 2, canvas.height / 2);
 }
@@ -628,7 +627,7 @@ function drawParticles() {
     ctx.globalAlpha = 1;
 }
 
-// ========== ГЛАВНЫЙ ЦИКЛ АНИМАЦИИ ==========
+// АНИМАЦИЯ
 function animate() {
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
