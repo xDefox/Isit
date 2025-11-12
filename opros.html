@@ -19,7 +19,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 10px;
+            padding: 20px;
         }
 
         .quiz-title {
@@ -110,7 +110,9 @@
             gap: 10px;
         }
 
-        button {
+        .btn-prev {
+            background: #718096;
+            color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 10px;
@@ -121,29 +123,14 @@
             flex: 1;
         }
 
-        .btn-prev {
-            background: #718096;
-            color: white;
-        }
-
         .btn-prev:hover:not(:disabled) {
             background: #4a5568;
         }
 
-        .btn-next {
-            background: #2d3748;
-            color: white;
-        }
-
-        .btn-next:hover:not(:disabled) {
-            background: #1a202c;
-        }
-
-        button:disabled {
+        .btn-prev:disabled {
             background: #e2e8f0;
             color: #a0aec0;
             cursor: not-allowed;
-            transform: none;
         }
 
         .result-container {
@@ -222,7 +209,7 @@
     </div>
 
     <div class="footer">
-        ИсИТ ВГТУ © 2025
+        ВГТУ © 2024
     </div>
 
     <script>
@@ -244,6 +231,7 @@
                 this.totalQuestions = 0;
                 this.answers = [];
                 this.questions = [];
+                this.autoAdvance = true;
                 
                 this.init();
             }
@@ -341,7 +329,6 @@
                         </div>
                         <div class="nav-buttons">
                             <button class="btn-prev" onclick="quiz.prev()" ${index === 0 ? 'disabled' : ''}>Назад</button>
-                            <button class="btn-next" onclick="quiz.next()">${index === this.totalQuestions - 1 ? 'Завершить' : 'Далее'}</button>
                         </div>
                     </div>
                 `).join('');
@@ -368,17 +355,16 @@
                 const questionId = container.id;
                 const questionIndex = parseInt(questionId.replace('question', '')) - 1;
                 this.answers[questionIndex] = parseInt(optionElement.dataset.value);
+
+                // Автоматический переход к следующему вопросу через 0.5 секунды
+                if (this.autoAdvance) {
+                    setTimeout(() => {
+                        this.next();
+                    }, 500);
+                }
             }
 
             next() {
-                const currentContainer = document.getElementById(`question${this.currentQuestion + 1}`);
-                const selectedOption = currentContainer.querySelector('.option.selected');
-                
-                if (!selectedOption && this.currentQuestion < this.totalQuestions - 1) {
-                    alert('Пожалуйста, выберите ответ перед продолжением!');
-                    return;
-                }
-
                 if (this.currentQuestion < this.totalQuestions - 1) {
                     document.getElementById(`question${this.currentQuestion + 1}`).classList.remove('active');
                     this.currentQuestion++;
@@ -407,23 +393,10 @@
 
             updateNavButtons() {
                 const prevBtn = document.querySelector('.btn-prev');
-                const nextBtn = document.querySelector('.btn-next');
-                
                 if (prevBtn) prevBtn.disabled = this.currentQuestion === 0;
-                if (nextBtn) {
-                    nextBtn.textContent = this.currentQuestion === this.totalQuestions - 1 ? 'Завершить' : 'Далее';
-                }
             }
 
             showResults() {
-                const lastContainer = document.getElementById(`question${this.totalQuestions}`);
-                const lastSelected = lastContainer.querySelector('.option.selected');
-                
-                if (!lastSelected) {
-                    alert('Пожалуйста, ответьте на последний вопрос!');
-                    return;
-                }
-
                 document.getElementById(`question${this.currentQuestion + 1}`).classList.remove('active');
                 
                 const scores = this.calculateScores();
