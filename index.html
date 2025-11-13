@@ -8,7 +8,7 @@
         body { 
             margin: 0; 
             font-family: Arial, sans-serif;
-            background: #1a1a1a;
+            background: #1a365d;
             color: white;
             overflow: hidden;
         }
@@ -16,7 +16,7 @@
         #codePanel { 
             width: 40%; 
             padding: 25px; 
-            background: #2d2d2d; 
+            background: #2d3748; 
             color: #f8f8f2;
             font-size: 16px;
             height: 100vh;
@@ -45,10 +45,10 @@
         .scenario-card {
             width: 250px;
             padding: 25px;
-            background: #2d2d2d;
+            background: #2d3748;
             border-radius: 15px;
             cursor: pointer;
-            border: 3px solid #444;
+            border: 3px solid #4a5568;
             transition: all 0.3s ease;
         }
         
@@ -75,17 +75,17 @@
         }
         
         .editable { 
-            background: #3e3e3e; 
+            background: #4a5568; 
             padding: 3px 8px; 
-            border: 2px dashed #666; 
+            border: 2px dashed #718096; 
             cursor: pointer;
             border-radius: 4px;
             transition: all 0.2s ease;
         }
         
         .editable:hover { 
-            background: #4e4e4e; 
-            border-color: #888;
+            background: #007acc; 
+            border-color: #007acc;
             transform: scale(1.05);
         }
         
@@ -107,7 +107,7 @@
         }
         
         .task {
-            background: #3a3a3a;
+            background: #4a5568;
             padding: 12px;
             margin: 12px 0;
             border-radius: 8px;
@@ -149,7 +149,7 @@
     <div class="scenarios-container">
         <div class="scenario-card" onclick="startScenario('gravity')">
             <h2>ГРАВИТАЦИЯ</h2>
-            <p>Управляй физикой шариков! Меняй гравитацию и трение</p>
+            <p>Управляй физикой шариков! Меняй гравитацию и прыгучесть</p>
             <div style="font-size: 3em; margin: 15px 0;">⚡</div>
         </div>
         
@@ -196,7 +196,7 @@
 const ValidationSystem = {
     limits: {
         gravity: { min: -10, max: 10 },
-        friction: { min: 0.5, max: 0.9999 },
+        bounce: { min: 0.1, max: 1.0 },
         ballSize: { min: 5, max: 200 },
         count: { min: 1, max: 1000 },
         speed: { min: 0.1, max: 20 },
@@ -265,18 +265,18 @@ const scenarios = {
     gravity: {
         code: `function updatePhysics() {
   gravity = <span class="editable" id="gravity">0.5</span>;
-  friction = <span class="editable" id="friction">0.99</span>;
+  bounce = <span class="editable" id="bounce">0.8</span>;
   ballSize = <span class="editable" id="ballSize">30</span>;
 }`,
         tasks: [
             "СДЕЛАЙ НЕВЕСОМОСТЬ! (0.1)",
             "СДЕЛАЙ СУПЕР-ГРАВИТАЦИЮ! (2.0)", 
-            "СДЕЛАЙ ВАКУУМ! (0.999)",
+            "СДЕЛАЙ ПРЫГУЧИЕ ШАРИКИ! (0.95)",
             "ПОПРОБУЙ ОТРИЦАТЕЛЬНУЮ ГРАВИТАЦИЮ! (-1.0)"
         ],
         variables: {
             gravity: 0.5,
-            friction: 0.99,
+            bounce: 0.8,
             ballSize: 30
         }
     },
@@ -430,26 +430,25 @@ function updateGravity() {
     
     gravityBalls.forEach(ball => {
         ball.vy += vars.gravity;
-        ball.vx *= vars.friction;
-        ball.vy *= vars.friction;
         ball.x += ball.vx;
         ball.y += ball.vy;
         
+        // Отскок от боковых стен
         if (ball.x <= 0 || ball.x >= canvas.width) {
-            ball.vx *= -0.8;
+            ball.vx *= -vars.bounce;
             ball.x = Math.max(0, Math.min(canvas.width, ball.x));
         }
 
+        // Отскок от потолка
         if (ball.y <= 0) {
-            ball.vy *= -0.8;
+            ball.vy *= -vars.bounce;
             ball.y = 0;
-            ball.vx *= 0.99;
         }
         
+        // Отскок от пола
         if (ball.y >= canvas.height - vars.ballSize) {
-            ball.vy *= -0.8;
+            ball.vy *= -vars.bounce;
             ball.y = canvas.height - vars.ballSize;
-            ball.vx *= 0.99;
         }
     });
 }
@@ -457,15 +456,15 @@ function updateGravity() {
 function drawGravity() {
     const vars = scenarios.gravity.variables;
     
-    ctx.fillStyle = '#1a1a1a';
+    ctx.fillStyle = '#1a365d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Потолок
-    ctx.fillStyle = '#444';
+    ctx.fillStyle = '#4a5568';
     ctx.fillRect(0, 0, canvas.width, 10);
     
     // Пол
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = '#2d3748';
     ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
     
     gravityBalls.forEach(ball => {
@@ -539,7 +538,7 @@ function updateColors() {
 function drawColors() {
     const vars = scenarios.colors.variables;
     
-    ctx.fillStyle = 'rgba(26, 26, 26, 0.1)';
+    ctx.fillStyle = 'rgba(26, 54, 93, 0.1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     colorParticles.forEach(particle => {
@@ -612,7 +611,7 @@ function updateParticles() {
 }
 
 function drawParticles() {
-    ctx.fillStyle = 'rgba(26, 26, 26, 0.2)';
+    ctx.fillStyle = 'rgba(26, 54, 93, 0.2)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     explosionParticles.forEach(particle => {
@@ -629,7 +628,7 @@ function drawParticles() {
 
 // АНИМАЦИЯ
 function animate() {
-    ctx.fillStyle = '#1a1a1a';
+    ctx.fillStyle = '#1a365d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     try {
