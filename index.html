@@ -40,6 +40,7 @@
             justify-content: center;
             gap: 20px;
             margin-top: 40px;
+            flex-wrap: wrap;
         }
         
         .scenario-card {
@@ -72,6 +73,8 @@
         
         #mainCanvas {
             display: block;
+            width: 100%;
+            height: 100%;
         }
         
         .editable { 
@@ -136,6 +139,89 @@
             max-width: 300px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             display: none;
+        }
+
+        /* Адаптивность для больших экранов */
+        @media (min-width: 1920px) {
+            #codePanel {
+                padding: 40px;
+                font-size: 18px;
+            }
+            
+            .scenario-card {
+                width: 300px;
+                padding: 30px;
+            }
+            
+            button {
+                padding: 15px 30px;
+                font-size: 18px;
+            }
+            
+            .task {
+                padding: 15px;
+                font-size: 16px;
+            }
+        }
+
+        @media (min-width: 2560px) {
+            #codePanel {
+                padding: 50px;
+                font-size: 20px;
+            }
+            
+            .scenario-card {
+                width: 350px;
+                padding: 35px;
+            }
+            
+            button {
+                padding: 18px 36px;
+                font-size: 20px;
+            }
+            
+            .task {
+                padding: 18px;
+                font-size: 18px;
+            }
+            
+            #scenarioSelection h1 {
+                font-size: 3.5em;
+            }
+            
+            #scenarioSelection p {
+                font-size: 1.5em;
+            }
+        }
+
+        @media (min-width: 3840px) {
+            #codePanel {
+                padding: 60px;
+                font-size: 24px;
+            }
+            
+            .scenario-card {
+                width: 400px;
+                padding: 40px;
+            }
+            
+            button {
+                padding: 20px 40px;
+                font-size: 22px;
+            }
+            
+            .task {
+                padding: 20px;
+                font-size: 20px;
+            }
+            
+            #scenarioSelection h1 {
+                font-size: 4em;
+            }
+            
+            #scenarioSelection p {
+                font-size: 1.8em;
+            }
         }
     </style>
 </head>
@@ -326,6 +412,28 @@ let gravityBalls = [];
 let colorParticles = [];
 let explosionParticles = [];
 
+// ОПТИМИЗАЦИЯ ДЛЯ БОЛЬШИХ ЭКРАНОВ
+const PerformanceOptimizer = {
+    getOptimalBallCount(canvasWidth, canvasHeight) {
+        const area = canvasWidth * canvasHeight;
+        if (area > 4000 * 2000) return 25; // 4K+
+        if (area > 2500 * 1500) return 20; // 2K
+        if (area > 1500 * 1000) return 15; // Full HD
+        return 10; // Меньшие разрешения
+    },
+
+    getOptimalParticleCount(baseCount, canvasWidth, canvasHeight) {
+        const area = canvasWidth * canvasHeight;
+        const scale = Math.min(area / (1920 * 1080), 3); // Максимум в 3 раза
+        return Math.floor(baseCount * scale);
+    },
+
+    getOptimalBallSize(baseSize, canvasWidth, canvasHeight) {
+        const minDimension = Math.min(canvasWidth, canvasHeight);
+        return Math.max(baseSize, minDimension * 0.02); // Минимум 2% от меньшей стороны
+    }
+};
+
 //  УПРАВЛЕНИЕ СЦЕНАРИЯМИ 
 
 function startScenario(scenarioKey) {
@@ -381,8 +489,10 @@ function initializeVisualization() {
     canvas = document.getElementById('mainCanvas');
     ctx = canvas.getContext('2d');
     
-    canvas.width = visualPanel.clientWidth;
-    canvas.height = visualPanel.clientHeight;
+    // Устанавливаем реальные размеры canvas
+    const rect = visualPanel.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
 }
 
 //РЕАЛИЗАЦИЯ СЦЕНАРИЕВ 
@@ -412,13 +522,16 @@ function initializeScenario() {
 //ГРАВИТАЦИЯ
 function initializeGravityScenario() {
     const vars = scenarios.gravity.variables;
-    const safeBallCount = Math.min(15, Math.max(5, vars.ballSize > 100 ? 5 : 10));
     
-    for (let i = 0; i < safeBallCount; i++) {
+    // Оптимальное количество шаров в зависимости от размера экрана
+    const optimalBallCount = PerformanceOptimizer.getOptimalBallCount(canvas.width, canvas.height);
+    const optimalBallSize = PerformanceOptimizer.getOptimalBallSize(vars.ballSize, canvas.width, canvas.height);
+    
+    for (let i = 0; i < optimalBallCount; i++) {
         gravityBalls.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height * 0.3,
-            vx: (Math.random() - 0.5) * 8,
+            vx: (Math.random() - 0.5) * 8 * (canvas.width / 1920), // Масштабируем скорость
             vy: 0,
             color: `hsl(${Math.random() * 360}, 70%, 60%)`
         });
@@ -427,9 +540,10 @@ function initializeGravityScenario() {
 
 function updateGravity() {
     const vars = scenarios.gravity.variables;
+    const optimalBallSize = PerformanceOptimizer.getOptimalBallSize(vars.ballSize, canvas.width, canvas.height);
     
     gravityBalls.forEach(ball => {
-        ball.vy += vars.gravity;
+        ball.vy += vars.gravity * (canvas.height / 1080); // Масштабируем гравитацию
         ball.x += ball.vx;
         ball.y += ball.vy;
         
@@ -446,37 +560,38 @@ function updateGravity() {
         }
         
         // Отскок от пола
-        if (ball.y >= canvas.height - vars.ballSize) {
+        if (ball.y >= canvas.height - optimalBallSize) {
             ball.vy *= -vars.bounce;
-            ball.y = canvas.height - vars.ballSize;
+            ball.y = canvas.height - optimalBallSize;
         }
     });
 }
 
 function drawGravity() {
     const vars = scenarios.gravity.variables;
+    const optimalBallSize = PerformanceOptimizer.getOptimalBallSize(vars.ballSize, canvas.width, canvas.height);
     
     ctx.fillStyle = '#1a365d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Потолок
     ctx.fillStyle = '#4a5568';
-    ctx.fillRect(0, 0, canvas.width, 10);
+    ctx.fillRect(0, 0, canvas.width, 10 * (canvas.height / 1080));
     
     // Пол
     ctx.fillStyle = '#2d3748';
-    ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
+    ctx.fillRect(0, canvas.height - 10 * (canvas.height / 1080), canvas.width, 10 * (canvas.height / 1080));
     
     gravityBalls.forEach(ball => {
         ctx.fillStyle = ball.color;
         ctx.beginPath();
-        ctx.arc(ball.x, ball.y, vars.ballSize, 0, Math.PI * 2);
+        ctx.arc(ball.x, ball.y, optimalBallSize, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 3;
+        ctx.shadowBlur = 10 * (canvas.width / 1920);
+        ctx.shadowOffsetX = 3 * (canvas.width / 1920);
+        ctx.shadowOffsetY = 3 * (canvas.height / 1080);
     });
     
     ctx.shadowColor = 'transparent';
@@ -484,6 +599,9 @@ function drawGravity() {
 
 // ЦВЕТНАЯ ИНФЕКЦИЯ
 function initializeColorsScenario() {
+    const vars = scenarios.colors.variables;
+    const optimalCount = PerformanceOptimizer.getOptimalParticleCount(vars.count, canvas.width, canvas.height);
+    
     colorParticles.push({
         x: canvas.width / 2,
         y: canvas.height / 2,
@@ -495,15 +613,16 @@ function initializeColorsScenario() {
 
 function updateColors() {
     const vars = scenarios.colors.variables;
+    const optimalCount = PerformanceOptimizer.getOptimalParticleCount(vars.count, canvas.width, canvas.height);
     
-    const maxNewParticles = Math.min(5, Math.floor(vars.count * 0.1));
+    const maxNewParticles = Math.min(5, Math.floor(optimalCount * 0.1));
     
-    if (colorParticles.length < vars.count && colorParticles.length > 0) {
+    if (colorParticles.length < optimalCount && colorParticles.length > 0) {
         for (let i = 0; i < maxNewParticles; i++) {
             const source = colorParticles[Math.floor(Math.random() * colorParticles.length)];
             if (source) {
                 const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * Math.min(vars.speed, 10);
+                const speed = Math.random() * Math.min(vars.speed, 10) * (canvas.width / 1920);
                 colorParticles.push({
                     x: source.x,
                     y: source.y,
@@ -512,7 +631,7 @@ function updateColors() {
                     age: 0
                 });
                 
-                if (colorParticles.length >= vars.count) break;
+                if (colorParticles.length >= optimalCount) break;
             }
         }
     }
@@ -529,8 +648,8 @@ function updateColors() {
         }
         
         if (Math.random() < 0.05) {
-            particle.vx += (Math.random() - 0.5) * 0.3;
-            particle.vy += (Math.random() - 0.5) * 0.3;
+            particle.vx += (Math.random() - 0.5) * 0.3 * (canvas.width / 1920);
+            particle.vy += (Math.random() - 0.5) * 0.3 * (canvas.height / 1080);
         }
     }
 }
@@ -541,11 +660,13 @@ function drawColors() {
     ctx.fillStyle = 'rgba(26, 54, 93, 0.1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    const particleSize = Math.max(2, 4 * (canvas.width / 1920));
+    
     colorParticles.forEach(particle => {
         const alpha = 1 - (particle.age / 500);
         if (alpha > 0) {
             ctx.fillStyle = `rgba(${vars.colorR}, ${Math.sin(particle.age * 0.1) * 127 + 127}, ${Math.cos(particle.age * 0.05) * 127 + 127}, ${alpha})`;
-            ctx.fillRect(particle.x - 2, particle.y - 2, 4, 4);
+            ctx.fillRect(particle.x - particleSize/2, particle.y - particleSize/2, particleSize, particleSize);
         }
     });
 }
@@ -557,12 +678,13 @@ function initializeParticlesScenario() {
 
 function createExplosion(x, y) {
     const vars = scenarios.particles.variables;
+    const optimalCount = PerformanceOptimizer.getOptimalParticleCount(vars.particles, canvas.width, canvas.height);
     
-    const safeParticleCount = Math.min(vars.particles, 500);
+    const safeParticleCount = Math.min(optimalCount, 1000); // Ограничиваем максимум
     
     for (let i = 0; i < safeParticleCount; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * Math.min(vars.power, 20);
+        const speed = Math.random() * Math.min(vars.power, 20) * (canvas.width / 1920);
         explosionParticles.push({
             x: x,
             y: y,
@@ -578,8 +700,10 @@ function createExplosion(x, y) {
 
 function updateParticles() {
     const vars = scenarios.particles.variables;
+    const optimalCount = PerformanceOptimizer.getOptimalParticleCount(vars.particles, canvas.width, canvas.height);
     
-    const maxTotalParticles = 2000;
+    const maxTotalParticles = Math.min(optimalCount * 3, 3000); // Динамический лимит
+    
     if (explosionParticles.length > maxTotalParticles) {
         explosionParticles = explosionParticles.slice(-maxTotalParticles);
     }
@@ -588,7 +712,7 @@ function updateParticles() {
         const particle = explosionParticles[i];
         particle.x += particle.vx;
         particle.y += particle.vy;
-        particle.vy += 0.1;
+        particle.vy += 0.1 * (canvas.height / 1080);
         particle.life--;
         
         if (particle.life <= 0) {
@@ -600,9 +724,9 @@ function updateParticles() {
         particle.vy *= 0.99;
     }
     
-    if (explosionParticles.length < vars.particles * 0.1 && 
+    if (explosionParticles.length < optimalCount * 0.1 && 
         Math.random() < 0.01 && 
-        explosionParticles.length < 1500) {
+        explosionParticles.length < maxTotalParticles * 0.5) {
         createExplosion(
             Math.random() * canvas.width,
             Math.random() * canvas.height * 0.5
@@ -619,7 +743,7 @@ function drawParticles() {
         ctx.globalAlpha = lifeRatio;
         ctx.fillStyle = particle.color;
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size * lifeRatio, 0, Math.PI * 2);
+        ctx.arc(particle.x, particle.y, particle.size * lifeRatio * (canvas.width / 1920), 0, Math.PI * 2);
         ctx.fill();
     });
     
@@ -675,14 +799,30 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Адаптация размера
+// Адаптация размера с оптимизацией
 window.addEventListener('resize', function() {
     if (canvas) {
         const visualPanel = document.getElementById('visualPanel');
-        canvas.width = visualPanel.clientWidth;
-        canvas.height = visualPanel.clientHeight;
+        const rect = visualPanel.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
         initializeScenario();
     }
+});
+
+// Оптимизация для ресайза
+let resizeTimeout;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+        if (canvas) {
+            const visualPanel = document.getElementById('visualPanel');
+            const rect = visualPanel.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            initializeScenario();
+        }
+    }, 250); // Задержка 250ms после окончания ресайза
 });
 </script>
 
