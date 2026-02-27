@@ -1,780 +1,829 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Кто ты в IT?</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
 
-        body {
-            background: #1a365d;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+      body {
+        background: #1a365d;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .quiz-title {
+        color: white;
+        font-size: 2.5em;
+        font-weight: 700;
+        margin-bottom: 25px;
+        text-align: center;
+        text-shadow: 0 2px 10px rgba(0, 122, 204, 0.3);
+      }
+
+      .quiz-container {
+        background: #2d3748;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 500px;
+        padding: 30px;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid #444;
+      }
+
+      .progress-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 4px;
+        background: #007acc;
+        transition: width 0.3s ease;
+        box-shadow: 0 0 10px rgba(0, 122, 204, 0.5);
+      }
+
+      .question-container {
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .question-container.active {
+        display: block;
+      }
+
+      .question-number {
+        color: #007acc;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .question-text {
+        font-size: 18px;
+        font-weight: 600;
+        color: #f8f8f2;
+        margin-bottom: 25px;
+        line-height: 1.4;
+        text-align: center;
+      }
+
+      .options-container {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 25px;
+      }
+
+      .option {
+        background: #3a3a3a;
+        border: 2px solid #444;
+        border-radius: 10px;
+        padding: 15px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 15px;
+        color: #cccccc;
+        text-align: center;
+      }
+
+      .option:hover {
+        background: #4a4a4a;
+        border-color: #007acc;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 122, 204, 0.2);
+      }
+
+      .option.selected {
+        background: #007acc;
+        color: white;
+        border-color: #007acc;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 122, 204, 0.4);
+      }
+
+      .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+      }
+
+      .btn-prev {
+        background: #555;
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+      }
+
+      .btn-prev:hover:not(:disabled) {
+        background: #666;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+      }
+
+      .btn-prev:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .result-container {
+        display: none;
+        text-align: center;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .result-icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+        text-shadow: 0 0 20px rgba(0, 122, 204, 0.5);
+      }
+
+      .result-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #f8f8f2;
+        margin-bottom: 15px;
+      }
+
+      .result-description {
+        color: #cccccc;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        font-size: 15px;
+        text-align: left;
+        background: #3a3a3a;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #007acc;
+      }
+
+      .restart-btn {
+        background: #007acc;
+        color: white;
+        padding: 15px 30px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+
+      .restart-btn:hover {
+        background: #005a9e;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 122, 204, 0.4);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 25px;
+        color: #666;
+        font-size: 12px;
+      }
+
+      /* Анимация появления */
+      .quiz-container {
+        animation: slideUp 0.5s ease;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Подсветка выбора */
+      .option {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .option::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 122, 204, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .option:hover::before {
+        left: 100%;
+      }
+
+      /* Адаптивность для больших экранов */
+      @media (min-width: 1920px) {
+        .quiz-container {
+          max-width: 600px;
+          padding: 40px;
         }
 
         .quiz-title {
-            color: white;
-            font-size: 2.5em;
-            font-weight: 700;
-            margin-bottom: 25px;
-            text-align: center;
-            text-shadow: 0 2px 10px rgba(0, 122, 204, 0.3);
-        }
-
-        .quiz-container {
-            background: #2d3748;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid #444;
-        }
-
-        .progress-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 4px;
-            background: #007acc;
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 122, 204, 0.5);
-        }
-
-        .question-container {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .question-container.active {
-            display: block;
-        }
-
-        .question-number {
-            color: #007acc;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+          font-size: 3em;
+          margin-bottom: 35px;
         }
 
         .question-text {
-            font-size: 18px;
-            font-weight: 600;
-            color: #f8f8f2;
-            margin-bottom: 25px;
-            line-height: 1.4;
-            text-align: center;
-        }
-
-        .options-container {
-            display: grid;
-            gap: 10px;
-            margin-bottom: 25px;
+          font-size: 22px;
+          margin-bottom: 30px;
         }
 
         .option {
-            background: #3a3a3a;
-            border: 2px solid #444;
-            border-radius: 10px;
-            padding: 15px 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 15px;
-            color: #cccccc;
-            text-align: center;
-        }
-
-        .option:hover {
-            background: #4a4a4a;
-            border-color: #007acc;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 122, 204, 0.2);
-        }
-
-        .option.selected {
-            background: #007acc;
-            color: white;
-            border-color: #007acc;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0, 122, 204, 0.4);
-        }
-
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
+          padding: 18px 25px;
+          font-size: 17px;
         }
 
         .btn-prev {
-            background: #555;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex: 1;
-        }
-
-        .btn-prev:hover:not(:disabled) {
-            background: #666;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-prev:disabled {
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .result-container {
-            display: none;
-            text-align: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .result-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px rgba(0, 122, 204, 0.5);
-        }
-
-        .result-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #f8f8f2;
-            margin-bottom: 15px;
-        }
-
-        .result-description {
-            color: #cccccc;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            font-size: 15px;
-            text-align: left;
-            background: #3a3a3a;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #007acc;
+          padding: 15px 30px;
+          font-size: 17px;
         }
 
         .restart-btn {
-            background: #007acc;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
+          padding: 18px 35px;
+          font-size: 18px;
         }
 
-        .restart-btn:hover {
-            background: #005a9e;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 122, 204, 0.4);
+        .result-icon {
+          font-size: 70px;
         }
 
-        @keyframes fadeIn {
-            from { 
-                opacity: 0; 
-                transform: translateY(20px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            }
+        .result-title {
+          font-size: 28px;
+        }
+
+        .result-description {
+          font-size: 17px;
+          padding: 25px;
+        }
+      }
+
+      @media (min-width: 2560px) {
+        .quiz-container {
+          max-width: 700px;
+          padding: 50px;
+        }
+
+        .quiz-title {
+          font-size: 3.5em;
+          margin-bottom: 45px;
+        }
+
+        .question-text {
+          font-size: 26px;
+          margin-bottom: 35px;
+        }
+
+        .option {
+          padding: 22px 30px;
+          font-size: 19px;
+        }
+
+        .options-container {
+          gap: 15px;
+        }
+
+        .btn-prev {
+          padding: 18px 35px;
+          font-size: 19px;
+        }
+
+        .restart-btn {
+          padding: 22px 40px;
+          font-size: 20px;
+        }
+
+        .result-icon {
+          font-size: 80px;
+        }
+
+        .result-title {
+          font-size: 32px;
+        }
+
+        .result-description {
+          font-size: 19px;
+          padding: 30px;
+        }
+      }
+
+      @media (min-width: 3840px) {
+        .quiz-container {
+          max-width: 900px;
+          padding: 60px;
+        }
+
+        .quiz-title {
+          font-size: 4.5em;
+          margin-bottom: 55px;
+        }
+
+        .question-text {
+          font-size: 32px;
+          margin-bottom: 45px;
+        }
+
+        .option {
+          padding: 25px 35px;
+          font-size: 22px;
+        }
+
+        .options-container {
+          gap: 20px;
+        }
+
+        .btn-prev {
+          padding: 22px 40px;
+          font-size: 22px;
+        }
+
+        .restart-btn {
+          padding: 25px 45px;
+          font-size: 23px;
+        }
+
+        .result-icon {
+          font-size: 100px;
+        }
+
+        .result-title {
+          font-size: 38px;
+        }
+
+        .result-description {
+          font-size: 22px;
+          padding: 35px;
+          line-height: 1.7;
         }
 
         .footer {
-            text-align: center;
-            margin-top: 25px;
-            color: #666;
-            font-size: 12px;
+          font-size: 16px;
+          margin-top: 35px;
+        }
+      }
+
+      /* Оптимизация для очень высоких экранов */
+      @media (min-height: 1200px) {
+        body {
+          padding: 40px 20px;
         }
 
-        /* Анимация появления */
         .quiz-container {
-            animation: slideUp 0.5s ease;
+          max-height: 90vh;
+          overflow-y: auto;
         }
+      }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+      /* Плавная прокрутка для больших контейнеров */
+      .quiz-container::-webkit-scrollbar {
+        width: 8px;
+      }
 
-        /* Подсветка выбора */
-        .option {
-            position: relative;
-            overflow: hidden;
-        }
+      .quiz-container::-webkit-scrollbar-track {
+        background: #2d3748;
+        border-radius: 4px;
+      }
 
-        .option::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 122, 204, 0.2), transparent);
-            transition: left 0.5s;
-        }
+      .quiz-container::-webkit-scrollbar-thumb {
+        background: #007acc;
+        border-radius: 4px;
+      }
 
-        .option:hover::before {
-            left: 100%;
-        }
-
-        /* Адаптивность для больших экранов */
-        @media (min-width: 1920px) {
-            .quiz-container {
-                max-width: 600px;
-                padding: 40px;
-            }
-            
-            .quiz-title {
-                font-size: 3em;
-                margin-bottom: 35px;
-            }
-            
-            .question-text {
-                font-size: 22px;
-                margin-bottom: 30px;
-            }
-            
-            .option {
-                padding: 18px 25px;
-                font-size: 17px;
-            }
-            
-            .btn-prev {
-                padding: 15px 30px;
-                font-size: 17px;
-            }
-            
-            .restart-btn {
-                padding: 18px 35px;
-                font-size: 18px;
-            }
-            
-            .result-icon {
-                font-size: 70px;
-            }
-            
-            .result-title {
-                font-size: 28px;
-            }
-            
-            .result-description {
-                font-size: 17px;
-                padding: 25px;
-            }
-        }
-
-        @media (min-width: 2560px) {
-            .quiz-container {
-                max-width: 700px;
-                padding: 50px;
-            }
-            
-            .quiz-title {
-                font-size: 3.5em;
-                margin-bottom: 45px;
-            }
-            
-            .question-text {
-                font-size: 26px;
-                margin-bottom: 35px;
-            }
-            
-            .option {
-                padding: 22px 30px;
-                font-size: 19px;
-            }
-            
-            .options-container {
-                gap: 15px;
-            }
-            
-            .btn-prev {
-                padding: 18px 35px;
-                font-size: 19px;
-            }
-            
-            .restart-btn {
-                padding: 22px 40px;
-                font-size: 20px;
-            }
-            
-            .result-icon {
-                font-size: 80px;
-            }
-            
-            .result-title {
-                font-size: 32px;
-            }
-            
-            .result-description {
-                font-size: 19px;
-                padding: 30px;
-            }
-        }
-
-        @media (min-width: 3840px) {
-            .quiz-container {
-                max-width: 900px;
-                padding: 60px;
-            }
-            
-            .quiz-title {
-                font-size: 4.5em;
-                margin-bottom: 55px;
-            }
-            
-            .question-text {
-                font-size: 32px;
-                margin-bottom: 45px;
-            }
-            
-            .option {
-                padding: 25px 35px;
-                font-size: 22px;
-            }
-            
-            .options-container {
-                gap: 20px;
-            }
-            
-            .btn-prev {
-                padding: 22px 40px;
-                font-size: 22px;
-            }
-            
-            .restart-btn {
-                padding: 25px 45px;
-                font-size: 23px;
-            }
-            
-            .result-icon {
-                font-size: 100px;
-            }
-            
-            .result-title {
-                font-size: 38px;
-            }
-            
-            .result-description {
-                font-size: 22px;
-                padding: 35px;
-                line-height: 1.7;
-            }
-            
-            .footer {
-                font-size: 16px;
-                margin-top: 35px;
-            }
-        }
-
-        /* Оптимизация для очень высоких экранов */
-        @media (min-height: 1200px) {
-            body {
-                padding: 40px 20px;
-            }
-            
-            .quiz-container {
-                max-height: 90vh;
-                overflow-y: auto;
-            }
-        }
-
-        /* Плавная прокрутка для больших контейнеров */
-        .quiz-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .quiz-container::-webkit-scrollbar-track {
-            background: #2d3748;
-            border-radius: 4px;
-        }
-
-        .quiz-container::-webkit-scrollbar-thumb {
-            background: #007acc;
-            border-radius: 4px;
-        }
-
-        .quiz-container::-webkit-scrollbar-thumb:hover {
-            background: #005a9e;
-        }
+      .quiz-container::-webkit-scrollbar-thumb:hover {
+        background: #005a9e;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="quiz-title">Кто ты в IT?</div>
-    
+
     <div class="quiz-container">
-        <div class="progress-bar" id="progressBar"></div>
-        
-        <!-- Контейнер для вопросов (генерируется автоматически) -->
-        <div id="questionsContainer"></div>
+      <div class="progress-bar" id="progressBar"></div>
 
-        <!-- Результат -->
-        <div class="result-container" id="resultContainer">
-            <div class="result-icon" id="resultIcon">🎯</div>
-            <div class="result-title" id="resultTitle">Ваш профиль</div>
-            <div class="result-description" id="resultDescription"></div>
-            <button class="restart-btn" onclick="quiz.restart()">Пройти ещё раз</button>
-        </div>
+      <!-- Контейнер для вопросов (генерируется автоматически) -->
+      <div id="questionsContainer"></div>
+
+      <!-- Результат -->
+      <div class="result-container" id="resultContainer">
+        <div class="result-icon" id="resultIcon">🎯</div>
+        <div class="result-title" id="resultTitle">Ваш профиль</div>
+        <div class="result-description" id="resultDescription"></div>
+        <button
+          class="restart-btn"
+          onclick="quiz.restart()"
+          ontouchstart="quiz.restart()"
+        >
+          Пройти ещё раз
+        </button>
+      </div>
     </div>
 
-    <div class="footer">
-        ИсИт ВГТУ © 2025
-    </div>
+    <div class="footer">ИсИт ВГТУ © 2026</div>
 
     <script>
-        // Фабрика вопросов
-        class QuestionFactory {
-            static createQuestion(number, text, options) {
-                return {
-                    number,
-                    text,
-                    options
-                };
-            }
+      // Фабрика вопросов
+      class QuestionFactory {
+        static createQuestion(number, text, options) {
+          return {
+            number,
+            text,
+            options,
+          };
+        }
+      }
+
+      // Класс опросника
+      class Quiz {
+        constructor() {
+          this.currentQuestion = 0;
+          this.totalQuestions = 0;
+          this.answers = [];
+          this.questions = [];
+          this.autoAdvance = true;
+
+          this.init();
         }
 
-        // Класс опросника
-        class Quiz {
-            constructor() {
-                this.currentQuestion = 0;
-                this.totalQuestions = 0;
-                this.answers = [];
-                this.questions = [];
-                this.autoAdvance = true;
-                
-                this.init();
-            }
+        init() {
+          this.createQuestions();
+          this.renderQuestions();
+          this.setupEventListeners();
+          this.updateProgress();
+          this.updateNavButtons();
+        }
 
-            init() {
-                this.createQuestions();
-                this.renderQuestions();
-                this.setupEventListeners();
-                this.updateProgress();
-                this.updateNavButtons();
-            }
+        createQuestions() {
+          const questionsData = [
+            {
+              text: "Если гаджет или программа барахлит, мне интересно самому найти причину и «починить» это",
+              options: [
+                "Точно нет",
+                "Скорее нет",
+                "Иногда",
+                "Скорее да",
+                "Это про меня!",
+              ],
+            },
+            {
+              text: "Я часто замечаю ошибки в интерфейсах сайтов или мелкие недочеты в оформлении",
+              options: ["Никогда", "Редко", "Иногда", "Часто", "Постоянно"],
+            },
+            {
+              text: "Мне нравится работать с цифрами, данными и искать в них скрытые закономерности",
+              options: [
+                "Совсем нет",
+                "Скорее нет",
+                "Нейтрально",
+                "Скорее да",
+                "Обожаю это",
+              ],
+            },
+            {
+              text: "Я умею объяснять сложные идеи так, чтобы их понял даже ребенок",
+              options: [
+                "Вовсе нет",
+                "С трудом",
+                "Средне",
+                "Довольно легко",
+                "Мастер объяснений",
+              ],
+            },
+            {
+              text: "Решать сложные логические задачи и головоломки для меня — удовольствие",
+              options: [
+                "Терпеть не могу",
+                "Редко",
+                "Иногда",
+                "Часто",
+                "Всегда за!",
+              ],
+            },
+            {
+              text: "Мне важно, чтобы финальный продукт выглядел эстетично и был удобным",
+              options: [
+                "Не важно",
+                "Мало важно",
+                "Средне",
+                "Важно",
+                "Критически важно",
+              ],
+            },
+            {
+              text: "В командной работе я чаще беру на себя роль организатора и слежу за дедлайнами",
+              options: ["Никогда", "Редко", "Иногда", "Часто", "Это мой стиль"],
+            },
+            {
+              text: "Я быстро осваиваю новые технологии и инструменты «методом тыка»",
+              options: [
+                "Очень медленно",
+                "Медленно",
+                "Средне",
+                "Быстро",
+                "Мгновенно",
+              ],
+            },
+            {
+              text: "Я люблю составлять планы, списки дел и структурировать информацию",
+              options: [
+                "Ненавижу это",
+                "Редко",
+                "Иногда",
+                "Часто",
+                "Постоянно",
+              ],
+            },
+            {
+              text: "Мне интересно создавать что-то новое с нуля",
+              options: ["Нет", "Скорее нет", "Иногда", "Да", "Определенно да!"],
+            },
+          ];
 
-            createQuestions() {
-                const questionsData = [
-                    {
-                        text: "Мне нравится разбираться, как устроены механизмы и приборы",
-                        options: ["Точно нет", "Скорее нет", "Иногда", "Скорее да", "Точно да"]
-                    },
-                    {
-                        text: "Когда что-то ломается, я пытаюсь починить сам, а не жду помощи",
-                        options: ["Точно нет", "Скорее нет", "Иногда", "Скорее да", "Всегда да"]
-                    },
-                    {
-                        text: "Мне интересно, как работают компьютерные программы и приложения",
-                        options: ["Совсем нет", "Редко", "Иногда", "Часто", "Очень интересно"]
-                    },
-                    {
-                        text: "Я обращаю внимание на то, насколько красиво и удобно выглядит сайт или приложение",
-                        options: ["Никогда", "Редко", "Иногда", "Часто", "Всегда"]
-                    },
-                    {
-                        text: "Мне нравится подбирать цвета, шрифты и оформление для своих проектов",
-                        options: ["Совсем нет", "Скорее нет", "Иногда", "Скорее да", "Точно да"]
-                    },
-                    {
-                        text: "Я замечаю, когда элемент интерфейса расположен неудобно или некрасиво",
-                        options: ["Никогда", "Редко", "Иногда", "Часто", "Постоянно"]
-                    },
-                    {
-                        text: "Мне нравится находить закономерности и связи между разными вещами",
-                        options: ["Точно нет", "Скорее нет", "Иногда", "Скорее да", "Точно да"]
-                    },
-                    {
-                        text: "Прежде чем принять решение, я люблю проанализировать все варианты",
-                        options: ["Никогда", "Редко", "Иногда", "Часто", "Всегда"]
-                    },
-                    {
-                        text: "Мне нравится работать с цифрами, таблицами и графиками",
-                        options: ["Совсем нет", "Скорее нет", "Нейтрально", "Скорее да", "Очень нравится"]
-                    },
-                    {
-                        text: "Мне легко находить общий язык с новыми людьми",
-                        options: ["Очень сложно", "Сложно", "Нормально", "Легко", "Очень легко"]
-                    },
-                    {
-                        text: "Я умею объяснять сложные вещи простыми словами",
-                        options: ["Точно нет", "Скорее нет", "Иногда", "Скорее да", "Точно да"]
-                    },
-                    {
-                        text: "Мне нравится работать в команде и распределять задачи",
-                        options: ["Совсем нет", "Скорее нет", "Нейтрально", "Скорее да", "Очень нравится"]
-                    },
-                    {
-                        text: "Мне нравится решать головоломки и логические задачи",
-                        options: ["Никогда", "Редко", "Иногда", "Часто", "Постоянно"]
-                    },
-                    {
-                        text: "Я быстро осваиваю новые программы и приложения",
-                        options: ["Очень медленно", "Медленно", "Средне", "Быстро", "Очень быстро"]
-                    },
-                    {
-                        text: "Мне интересно создавать что-то новое с помощью технологий",
-                        options: ["Совсем нет", "Скорее нет", "Иногда", "Скорее да", "Точно да"]
-                    }
-                ];
+          this.questions = questionsData.map((data, index) =>
+            QuestionFactory.createQuestion(index + 1, data.text, data.options),
+          );
 
-                this.questions = questionsData.map((data, index) => 
-                    QuestionFactory.createQuestion(index + 1, data.text, data.options)
-                );
+          this.totalQuestions = this.questions.length;
+          this.answers = new Array(this.totalQuestions).fill(0);
+        }
 
-                this.totalQuestions = this.questions.length;
-                this.answers = new Array(this.totalQuestions).fill(0);
-            }
-
-            renderQuestions() {
-                const container = document.getElementById('questionsContainer');
-                container.innerHTML = this.questions.map((question, index) => `
-                    <div class="question-container ${index === 0 ? 'active' : ''}" id="question${index + 1}">
+        renderQuestions() {
+          const container = document.getElementById("questionsContainer");
+          container.innerHTML = this.questions
+            .map(
+              (question, index) => `
+                    <div class="question-container ${index === 0 ? "active" : ""}" id="question${index + 1}">
                         <div class="question-number">Вопрос ${question.number}/${this.totalQuestions}</div>
                         <div class="question-text">${question.text}</div>
                         <div class="options-container">
-                            ${question.options.map((option, optionIndex) => 
-                                `<div class="option" data-value="${optionIndex + 1}">${option}</div>`
-                            ).join('')}
+                            ${question.options
+                              .map(
+                                (option, optionIndex) =>
+                                  `<div class="option" data-value="${optionIndex + 1}">${option}</div>`,
+                              )
+                              .join("")}
                         </div>
                         <div class="nav-buttons">
-                            <button class="btn-prev" onclick="quiz.prev()" ${index === 0 ? 'disabled' : ''}>Назад</button>
+                            <button class="btn-prev" onclick="quiz.prev()" ontouchstart="quiz.prev()" ${index === 0 ? "disabled" : ""}>Назад</button>
                         </div>
                     </div>
-                `).join('');
-            }
-
-            setupEventListeners() {
-                document.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('option')) {
-                        this.handleOptionClick(e.target);
-                    }
-                });
-
-                // Оптимизация для сенсорных экранов
-                document.addEventListener('touchstart', (e) => {
-                    if (e.target.classList.contains('option')) {
-                        e.preventDefault();
-                    }
-                }, { passive: false });
-            }
-
-            handleOptionClick(optionElement) {
-                const container = optionElement.closest('.question-container');
-                const siblings = optionElement.parentElement.children;
-                
-                for (let sibling of siblings) {
-                    sibling.classList.remove('selected');
-                }
-                
-                optionElement.classList.add('selected');
-                
-                const questionId = container.id;
-                const questionIndex = parseInt(questionId.replace('question', '')) - 1;
-                this.answers[questionIndex] = parseInt(optionElement.dataset.value);
-
-                // Автоматический переход к следующему вопросу через 0.5 секунды
-                if (this.autoAdvance) {
-                    setTimeout(() => {
-                        this.next();
-                    }, 500);
-                }
-            }
-
-            next() {
-                if (this.currentQuestion < this.totalQuestions - 1) {
-                    document.getElementById(`question${this.currentQuestion + 1}`).classList.remove('active');
-                    this.currentQuestion++;
-                    document.getElementById(`question${this.currentQuestion + 1}`).classList.add('active');
-                    this.updateProgress();
-                    this.updateNavButtons();
-                    
-                    // Прокрутка к верху для больших экранов
-                    this.scrollToTop();
-                } else {
-                    this.showResults();
-                }
-            }
-
-            prev() {
-                if (this.currentQuestion > 0) {
-                    document.getElementById(`question${this.currentQuestion + 1}`).classList.remove('active');
-                    this.currentQuestion--;
-                    document.getElementById(`question${this.currentQuestion + 1}`).classlist.add('active');
-                    this.updateProgress();
-                    this.updateNavButtons();
-                    
-                    // Прокрутка к верху для больших экранов
-                    this.scrollToTop();
-                }
-            }
-
-            scrollToTop() {
-                const quizContainer = document.querySelector('.quiz-container');
-                if (quizContainer.scrollHeight > quizContainer.clientHeight) {
-                    quizContainer.scrollTop = 0;
-                }
-            }
-
-            updateProgress() {
-                const progress = ((this.currentQuestion + 1) / this.totalQuestions) * 100;
-                document.getElementById('progressBar').style.width = `${progress}%`;
-            }
-
-            updateNavButtons() {
-                const prevBtn = document.querySelector('.btn-prev');
-                if (prevBtn) prevBtn.disabled = this.currentQuestion === 0;
-            }
-
-            showResults() {
-                document.getElementById(`question${this.currentQuestion + 1}`).classList.remove('active');
-                
-                const scores = this.calculateScores();
-                const userProfile = this.determineProfile(scores);
-                this.displayResult(userProfile);
-                
-                // Прокрутка к верху для больших экранов
-                this.scrollToTop();
-            }
-
-            calculateScores() {
-                const questionWeights = {
-                    'developer': [1, 1, 1, 0, 0, 0, 0.5, 0.5, 0.5, 0, 0, 0, 1, 1, 0.5],
-                    'designer': [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                    'analyst': [0.5, 0, 0.5, 0, 0, 0, 1, 1, 1, 0, 0.5, 0, 0.5, 0.5, 0],
-                    'manager': [0, 0, 0, 0, 0, 0, 0, 0.5, 0, 1, 1, 1, 0, 0, 0]
-                };
-
-                const scores = {
-                    'developer': 0,
-                    'designer': 0,
-                    'analyst': 0,
-                    'manager': 0
-                };
-
-                for (let i = 0; i < this.answers.length; i++) {
-                    for (const profile in questionWeights) {
-                        scores[profile] += this.answers[i] * questionWeights[profile][i];
-                    }
-                }
-
-                return scores;
-            }
-
-            determineProfile(scores) {
-                let maxScore = 0;
-                let userProfile = 'developer';
-                
-                for (const profile in scores) {
-                    if (scores[profile] > maxScore) {
-                        maxScore = scores[profile];
-                        userProfile = profile;
-                    }
-                }
-
-                return userProfile;
-            }
-
-            displayResult(userProfile) {
-                const profiles = {
-                    'developer': {
-                        title: '💻 Разработчик',
-                        description: 'Вы любите разбираться в технике, решать логические задачи и быстро осваиваете новые технологии. В IT вас может заинтересовать программирование, создание приложений и работа с кодом.',
-                        icon: '💻'
-                    },
-                    'designer': {
-                        title: '🎨 Дизайнер',
-                        description: 'Вы обращаете внимание на красоту и удобство, обладаете хорошим вкусом и любите творить. В IT вам подойдут направления веб-дизайна, UI/UX дизайна и создания интерфейсов.',
-                        icon: '🎨'
-                    },
-                    'analyst': {
-                        title: '📊 Аналитик',
-                        description: 'Вы умеете находить закономерности, анализировать данные и принимать взвешенные решения. В IT вас ждут в бизнес-аналитике, data science и системном анализе.',
-                        icon: '📊'
-                    },
-                    'manager': {
-                        title: '👨‍💼 Менеджер проектов',
-                        description: 'Вы легко находите общий язык с людьми, умеете объяснять сложное простыми словами и организовывать работу. В IT вам подойдет управление проектами и командами.',
-                        icon: '👨‍💼'
-                    }
-                };
-
-                const profile = profiles[userProfile];
-                document.getElementById('resultIcon').textContent = profile.icon;
-                document.getElementById('resultTitle').textContent = profile.title;
-                document.getElementById('resultDescription').textContent = profile.description;
-                document.getElementById('resultContainer').style.display = 'block';
-            }
-
-            restart() {
-                this.currentQuestion = 0;
-                this.answers = new Array(this.totalQuestions).fill(0);
-                document.getElementById('resultContainer').style.display = 'none';
-                
-                for (let i = 1; i <= this.totalQuestions; i++) {
-                    document.getElementById(`question${i}`).classList.remove('active');
-                }
-                
-                document.getElementById('question1').classList.add('active');
-                this.updateProgress();
-                this.updateNavButtons();
-                
-                const selectedOptions = document.querySelectorAll('.option.selected');
-                selectedOptions.forEach(option => {
-                    option.classList.remove('selected');
-                });
-                
-                // Прокрутка к верху для больших экранов
-                this.scrollToTop();
-            }
+                `,
+            )
+            .join("");
         }
 
-        // Инициализация опросника
-        const quiz = new Quiz();
+        setupEventListeners() {
+          document.addEventListener("click", (e) => {
+            if (e.target.classList.contains("option")) {
+              this.handleOptionClick(e.target);
+            }
+          });
 
-        // Адаптация к ресайзу окна
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function() {
-                // При ресайзе просто обновляем прогресс и навигацию
-                quiz.updateProgress();
-                quiz.updateNavButtons();
-            }, 100);
-        });
+          // Оптимизация для сенсорных экранов
+          document.addEventListener(
+            "touchstart",
+            (e) => {
+              if (e.target.classList.contains("option")) {
+                this.handleOptionClick(e.target);
+                e.preventDefault();
+              }
+            },
+            { passive: false },
+          );
+        }
+
+        handleOptionClick(optionElement) {
+          const container = optionElement.closest(".question-container");
+          const siblings = optionElement.parentElement.children;
+
+          for (let sibling of siblings) {
+            sibling.classList.remove("selected");
+          }
+
+          optionElement.classList.add("selected");
+
+          const questionId = container.id;
+          const questionIndex =
+            parseInt(questionId.replace("question", "")) - 1;
+          this.answers[questionIndex] = parseInt(optionElement.dataset.value);
+
+          // Автоматический переход к следующему вопросу через 0.5 секунды
+          if (this.autoAdvance) {
+            setTimeout(() => {
+              this.next();
+            }, 500);
+          }
+        }
+
+        next() {
+          if (this.currentQuestion < this.totalQuestions - 1) {
+            document
+              .getElementById(`question${this.currentQuestion + 1}`)
+              .classList.remove("active");
+            this.currentQuestion++;
+            document
+              .getElementById(`question${this.currentQuestion + 1}`)
+              .classList.add("active");
+            this.updateProgress();
+            this.updateNavButtons();
+
+            // Прокрутка к верху для больших экранов
+            this.scrollToTop();
+          } else {
+            this.showResults();
+          }
+        }
+
+        prev() {
+          if (this.currentQuestion > 0) {
+            document
+              .getElementById(`question${this.currentQuestion + 1}`)
+              .classList.remove("active");
+            this.currentQuestion--;
+            document
+              .getElementById(`question${this.currentQuestion + 1}`)
+              .classList.add("active");
+            this.updateProgress();
+            this.updateNavButtons();
+
+            // Прокрутка к верху для больших экранов
+            this.scrollToTop();
+          }
+        }
+
+        scrollToTop() {
+          const quizContainer = document.querySelector(".quiz-container");
+          if (quizContainer.scrollHeight > quizContainer.clientHeight) {
+            quizContainer.scrollTop = 0;
+          }
+        }
+
+        updateProgress() {
+          const progress =
+            ((this.currentQuestion + 1) / this.totalQuestions) * 100;
+          document.getElementById("progressBar").style.width = `${progress}%`;
+        }
+
+        updateNavButtons() {
+          const prevBtn = document.querySelector(".btn-prev");
+          if (prevBtn) prevBtn.disabled = this.currentQuestion === 0;
+        }
+
+        showResults() {
+          document
+            .getElementById(`question${this.currentQuestion + 1}`)
+            .classList.remove("active");
+
+          const scores = this.calculateScores();
+          const userProfile = this.determineProfile(scores);
+          this.displayResult(userProfile);
+
+          this.scrollToTop();
+        }
+
+        calculateScores() {
+          const questionWeights = {
+            developer: [0.9, 0.1, 0.3, 0.2, 0.9, 0.2, 0.1, 0.8, 0.3, 0.9],
+
+            designer: [0.2, 0.9, 0.1, 0.3, 0.2, 0.9, 0.3, 0.5, 0.2, 0.9],
+
+            analyst: [0.4, 0.3, 0.9, 0.4, 0.8, 0.4, 0.5, 0.4, 0.9, 0.3],
+
+            manager: [0.1, 0.2, 0.4, 0.9, 0.3, 0.5, 0.9, 0.3, 0.8, 0.5],
+          };
+
+          const scores = { developer: 0, designer: 0, analyst: 0, manager: 0 };
+
+          for (let i = 0; i < this.answers.length; i++) {
+            for (const profile in questionWeights) {
+              scores[profile] += this.answers[i] * questionWeights[profile][i];
+            }
+          }
+          return scores;
+        }
+
+        determineProfile(scores) {
+          let allScores = Object.entries(scores)
+            .map(([profile, score]) => ({ profile, score }))
+            .sort((a, b) => b.score - a.score);
+
+          console.log("Результаты расчетов:", allScores);
+
+          return allScores[0].profile;
+        }
+
+        displayResult(userProfile) {
+          const profiles = {
+            developer: {
+              title: "💻 Разработчик",
+              description:
+                "Вы любите разбираться в технике, решать логические задачи и быстро осваиваете новые технологии. В IT вас может заинтересовать программирование, создание приложений и работа с кодом.",
+              icon: "💻",
+            },
+            designer: {
+              title: "🎨 Дизайнер",
+              description:
+                "Вы обращаете внимание на красоту и удобство, обладаете хорошим вкусом и любите творить. В IT вам подойдут направления веб-дизайна, UI/UX дизайна и создания интерфейсов.",
+              icon: "🎨",
+            },
+            analyst: {
+              title: "📊 Аналитик",
+              description:
+                "Вы умеете находить закономерности, анализировать данные и принимать взвешенные решения. В IT вас ждут в бизнес-аналитике, data science и системном анализе.",
+              icon: "📊",
+            },
+            manager: {
+              title: "👨‍💼 Менеджер проектов",
+              description:
+                "Вы легко находите общий язык с людьми, умеете объяснять сложное простыми словами и организовывать работу. В IT вам подойдет управление проектами и командами.",
+              icon: "👨‍💼",
+            },
+          };
+
+          const profile = profiles[userProfile];
+          document.getElementById("resultIcon").textContent = profile.icon;
+          document.getElementById("resultTitle").textContent = profile.title;
+          document.getElementById("resultDescription").textContent =
+            profile.description;
+          document.getElementById("resultContainer").style.display = "block";
+        }
+
+        restart() {
+          this.currentQuestion = 0;
+          this.answers = new Array(this.totalQuestions).fill(0);
+          document.getElementById("resultContainer").style.display = "none";
+
+          for (let i = 1; i <= this.totalQuestions; i++) {
+            document.getElementById(`question${i}`).classList.remove("active");
+          }
+
+          document.getElementById("question1").classList.add("active");
+          this.updateProgress();
+          this.updateNavButtons();
+
+          const selectedOptions = document.querySelectorAll(".option.selected");
+          selectedOptions.forEach((option) => {
+            option.classList.remove("selected");
+          });
+
+          // Прокрутка к верху для больших экранов
+          this.scrollToTop();
+        }
+      }
+
+      const quiz = new Quiz();
+
+      let resizeTimeout;
+      window.addEventListener("resize", function () {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function () {
+          quiz.updateProgress();
+          quiz.updateNavButtons();
+        }, 100);
+      });
     </script>
-</body>
+  </body>
 </html>

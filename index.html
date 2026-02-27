@@ -33,30 +33,75 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
         
         .scenarios-container {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 30px;
             margin-top: 40px;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
         }
         
         .scenario-card {
-            width: 250px;
-            padding: 25px;
+            width: 280px;
+            padding: 30px;
             background: #2d3748;
-            border-radius: 15px;
+            border-radius: 20px;
             cursor: pointer;
-            border: 3px solid #4a5568;
-            transition: all 0.3s ease;
+            border: 3px solid #007acc;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,122,204,0.3);
+        }
+        
+        .scenario-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0,122,204,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+        }
+        
+        .scenario-card:hover::before {
+            transform: rotate(45deg) translate(50%, 50%);
         }
         
         .scenario-card:hover {
             border-color: #007acc;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,122,204,0.3);
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(0,122,204,0.4);
+        }
+
+        .scenario-card h2 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #f8f8f2;
+        }
+
+        .scenario-icon {
+            font-size: 4em;
+            margin: 20px 0;
+            transition: all 0.4s ease;
+        }
+
+        .scenario-card:hover .scenario-icon {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
         }
         
         /* Основной экран */
@@ -102,11 +147,13 @@
             border: none;
             border-radius: 8px;
             transition: all 0.3s ease;
+            font-weight: bold;
         }
         
         button:hover {
             background: #005a9e;
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,122,204,0.4);
         }
         
         .task {
@@ -115,6 +162,12 @@
             margin: 12px 0;
             border-radius: 8px;
             border-left: 4px solid #007acc;
+            transition: all 0.3s ease;
+        }
+
+        .task:hover {
+            border-left-color: #007acc;
+            transform: translateX(5px);
         }
         
         .success-message {
@@ -141,6 +194,38 @@
             display: none;
         }
 
+        /* Анимация плиток */
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg) scale(1); 
+            }
+            25% { 
+                transform: translateY(-20px) rotate(2deg) scale(1.02); 
+            }
+            50% { 
+                transform: translateY(-10px) rotate(-1deg) scale(1.01); 
+            }
+            75% { 
+                transform: translateY(-15px) rotate(1deg) scale(1.015); 
+            }
+        }
+
+        .scenario-card {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .scenario-card:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .scenario-card:nth-child(2) {
+            animation-delay: -1.3s;
+        }
+
+        .scenario-card:nth-child(3) {
+            animation-delay: -2.6s;
+        }
+
         /* Адаптивность для больших экранов */
         @media (min-width: 1920px) {
             #codePanel {
@@ -149,8 +234,16 @@
             }
             
             .scenario-card {
-                width: 300px;
-                padding: 30px;
+                width: 320px;
+                padding: 35px;
+            }
+            
+            .scenario-card h2 {
+                font-size: 2.2em;
+            }
+            
+            .scenario-icon {
+                font-size: 5em;
             }
             
             button {
@@ -171,8 +264,16 @@
             }
             
             .scenario-card {
-                width: 350px;
-                padding: 35px;
+                width: 380px;
+                padding: 40px;
+            }
+            
+            .scenario-card h2 {
+                font-size: 2.5em;
+            }
+            
+            .scenario-icon {
+                font-size: 6em;
             }
             
             button {
@@ -201,17 +302,25 @@
             }
             
             .scenario-card {
-                width: 400px;
-                padding: 40px;
+                width: 450px;
+                padding: 50px;
+            }
+            
+            .scenario-card h2 {
+                font-size: 3em;
+            }
+            
+            .scenario-icon {
+                font-size: 7em;
             }
             
             button {
-                padding: 20px 40px;
+                padding: 22px 44px;
                 font-size: 22px;
             }
             
             .task {
-                padding: 20px;
+                padding: 22px;
                 font-size: 20px;
             }
             
@@ -233,22 +342,22 @@
     <p style="font-size: 1.2em; color: #ccc;">Измени всего одну строчку кода и увидишь магию!</p>
     
     <div class="scenarios-container">
-        <div class="scenario-card" onclick="startScenario('gravity')">
+        <div class="scenario-card" onclick="startScenario('gravity')" ontouchstart="startScenario('gravity')">
             <h2>ГРАВИТАЦИЯ</h2>
             <p>Управляй физикой шариков! Меняй гравитацию и прыгучесть</p>
-            <div style="font-size: 3em; margin: 15px 0;">⚡</div>
+            <div class="scenario-icon">⚡</div>
         </div>
         
-        <div class="scenario-card" onclick="startScenario('colors')">
+        <div class="scenario-card" onclick="startScenario('colors')" ontouchstart="startScenario('colors')">
             <h2>ЦВЕТНАЯ ИНФЕКЦИЯ</h2>
             <p>Создай вирусный визуальный эффект!</p>
-            <div style="font-size: 3em; margin: 15px 0;">🎨</div>
+            <div class="scenario-icon">🎨</div>
         </div>
         
-        <div class="scenario-card" onclick="startScenario('particles')">
+        <div class="scenario-card" onclick="startScenario('particles')" ontouchstart="startScenario('particles')">
             <h2>ЧАСТИЦЫ</h2>
             <p>Управляй тысячами частиц!</p>
-            <div style="font-size: 3em; margin: 15px 0;">✨</div>
+            <div class="scenario-icon">✨</div>
         </div>
     </div>
 </div>
@@ -267,8 +376,8 @@
             <h3>ЗАДАНИЯ:</h3>
         </div>
         
-        <button onclick="applyChanges()"> ЗАПУСТИТЬ ИЗМЕНЕНИЯ!</button>
-        <button onclick="showScenarioSelection()">← ВЫБРАТЬ ДРУГОЙ СЦЕНАРИЙ</button>
+        <button onclick="applyChanges()" ontouchstart="applyChanges()"> ЗАПУСТИТЬ ИЗМЕНЕНИЯ!</button>
+        <button onclick="showScenarioSelection()" ontouchstart="showScenarioSelection()">← ВЫБРАТЬ ДРУГОЙ СЦЕНАРИЙ</button>
     </div>
     <div id="visualPanel">
         <canvas id="mainCanvas"></canvas>
@@ -278,6 +387,37 @@
 <div class="error-message" id="errorMessage"></div>
 
 <script>
+// СИСТЕМА АВТОВОЗВРАТА (без видимого таймера)
+const AutoReturnSystem = {
+    timeout: null,
+    duration: 30000, // 30 секунд
+    
+    start() {
+        this.stop(); // Останавливаем предыдущий таймер
+        
+        this.timeout = setTimeout(() => {
+            this.returnToSelection();
+        }, this.duration);
+    },
+    
+    stop() {
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+    },
+    
+    reset() {
+        this.stop();
+        this.start();
+    },
+    
+    returnToSelection() {
+        this.stop();
+        showScenarioSelection();
+    }
+};
+
 // ВАЛИДАЦИЯ
 const ValidationSystem = {
     limits: {
@@ -465,12 +605,18 @@ function startScenario(scenarioKey) {
     
     initializeVisualization();
     initializeScenario();
+    
+    // Запускаем таймер автовозврата
+    AutoReturnSystem.start();
 }
 
 function showScenarioSelection() {
     cancelAnimationFrame(animationId);
     document.getElementById('scenarioSelection').style.display = 'block';
     document.getElementById('mainApp').style.display = 'none';
+    
+    // Останавливаем таймер при возврате
+    AutoReturnSystem.stop();
 }
 
 function applyChanges() {
@@ -480,7 +626,7 @@ function applyChanges() {
     
     if (hasChanges) {
         const successMsg = document.getElementById('successMessage');
-        successMsg.textContent = '✅ Изменения применены!';
+        successMsg.textContent = '✅ Успех! Изменения применены!';
         successMsg.style.display = 'block';
         
         setTimeout(() => {
@@ -488,6 +634,9 @@ function applyChanges() {
         }, 2000);
         
         initializeScenario();
+        
+        // Сбрасываем таймер при активности пользователя
+        AutoReturnSystem.reset();
     }
 }
 
@@ -863,9 +1012,18 @@ document.addEventListener('click', function(e) {
         if (newValue !== null) {
             const validatedValue = ValidationSystem.validateValue(fieldId, newValue);
             e.target.textContent = validatedValue;
+            
+            // Сбрасываем таймер при активности пользователя
+            AutoReturnSystem.reset();
         }
     }
 });
+
+// Отслеживаем любую активность пользователя для сброса таймера
+document.addEventListener('mousemove', () => AutoReturnSystem.reset());
+document.addEventListener('keydown', () => AutoReturnSystem.reset());
+document.addEventListener('click', () => AutoReturnSystem.reset());
+document.addEventListener('touchstart', () => AutoReturnSystem.reset());
 
 // Адаптация размера с оптимизацией
 let resizeTimeout;
@@ -880,6 +1038,12 @@ window.addEventListener('resize', function() {
             initializeScenario();
         }
     }, 250);
+});
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Автовозврат работает, но без видимого таймера
+    AutoReturnSystem.start();
 });
 </script>
 
