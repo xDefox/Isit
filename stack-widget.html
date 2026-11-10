@@ -26,7 +26,7 @@
     .cluster { background: linear-gradient(145deg, #142840 0%, #0e1d33 100%); border: 1px solid #1e3a5c; border-radius: 20px; overflow: hidden; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; position: relative; min-height: 280px; display: flex; flex-direction: column; }
     .cluster:hover { transform: translateY(-6px) scale(1.015); box-shadow: 0 20px 50px rgba(0,102,204,0.25); border-color: #0066cc; }
     .cluster:focus-visible { outline: 2px solid #0099ff; outline-offset: 3px; }
-    .cluster-header { padding: clamp(16px, 2vw, 24px); display: flex; align-items: flex-start; gap: 16px; border-bottom: 1px solid #1e3a5c; min-height: 120px; }
+    .cluster-header { padding: clamp(16px, 2vw, 24px); display: flex; align-items: flex-start; gap: 16px; border-bottom: 1px solid #1e3a5c; min-height: 120px; flex-shrink: 0; }
     .cluster-icon { width: clamp(56px, 7vw, 72px); height: clamp(56px, 7vw, 72px); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: clamp(24px, 3vw, 32px); flex-shrink: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
     .cluster-info { flex: 1; min-width: 0; }
     .cluster-name { font-size: clamp(1.1rem, 1.4vw, 1.35rem); font-weight: 700; margin-bottom: 6px; }
@@ -38,9 +38,9 @@
     .cluster.expanded .cluster-expand-hint { transform: rotate(180deg); }
     
     /* Expanded content */
-    .cluster-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 0.3s; background: rgba(0,0,0,0.15); }
-    .cluster.expanded .cluster-body { max-height: 800px; padding: 0 0 20px; }
-    .cluster-sections { padding: 20px clamp(16px, 2vw, 24px) 0; display: grid; gap: 16px; }
+    .cluster-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 0.3s; background: rgba(0,0,0,0.15); flex: 1; display: flex; flex-direction: column; }
+    .cluster.expanded .cluster-body { max-height: 60vh; padding: 0 0 20px; }
+    .cluster-sections { padding: 20px clamp(16px, 2vw, 24px) 0; display: grid; gap: 16px; overflow-y: auto; max-height: calc(60vh - 40px); }
     .section { background: rgba(255,255,255,0.03); border: 1px solid #1e3a5c; border-radius: 12px; overflow: hidden; }
     .section-header { padding: 12px 16px; background: rgba(0,102,204,0.1); border-bottom: 1px solid #1e3a5c; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: clamp(0.85rem, 1vw, 0.95rem); color: #a8d0ff; }
     .section-header svg { flex-shrink: 0; }
