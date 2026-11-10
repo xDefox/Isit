@@ -5,10 +5,10 @@
 
 // Веса из оpros.html (должны совпадать)
 const questionWeights = {
-  developer:     [0.9, 0.1, 0.1, 0.8, 0.7, 0.1, 0.05, 0.1, 0.2, 0.1],
-  designer:      [0.1, 0.8, 0.1, 0.1, 0.1, 0.9, 0.05, 0.1, 0.1, 0.2],
-  analyst:       [0.2, 0.2, 0.9, 0.1, 0.3, 0.1, 0.1, 0.8, 0.1, 0.1],
-  manager:       [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1.0, 0.4, 0.5, 0.15],
+  developer:     [0.86, 0.10, 0.10, 0.76, 0.67, 0.10, 0.05, 0.10, 0.19, 0.10],
+  designer:      [0.12, 0.94, 0.12, 0.12, 0.12, 1.06, 0.06, 0.12, 0.12, 0.24],
+  analyst:       [0.21, 0.21, 0.93, 0.10, 0.31, 0.10, 0.10, 0.83, 0.10, 0.10],
+  manager:       [0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 1.13, 0.45, 0.57, 0.17],
 };
 
 // «Идеальные» ответы для каждого профиля (1-5)
@@ -48,12 +48,12 @@ function determineProfile(scores) {
     .sort((a, b) => b.score - a.score)[0].profile;
 }
 
-// Создаём 100 студентов: по 25 на каждый истинный профиль
+// Создаём 200 студентов: по 50 на каждый истинный профиль
 const profiles = ['developer', 'designer', 'analyst', 'manager'];
 const students = [];
 
 for (const trueProfile of profiles) {
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < 50; i++) {
     students.push({
       id: `${trueProfile}_${i + 1}`,
       trueProfile,
@@ -92,7 +92,7 @@ for (const p of profiles) {
 }
 
 const overallAcc = details.filter(d => d.correct).length / details.length;
-console.log(`\nОБЩАЯ ТОЧНОСТЬ: ${(overallAcc*100).toFixed(0)}%`);
+console.log(`\nОБЩАЯ ТОЧНОСТЬ: ${(overallAcc*100).toFixed(1)}%`);
 
 // Проверка на доминирование
 const maxCount = Math.max(...Object.values(results));
@@ -102,3 +102,41 @@ if (maxCount > students.length * 0.4) {
 } else {
   console.log(`\n✅ Распределение сбалансировано, доминирования нет`);
 }
+
+// Сохранение результатов в файл
+const fs = require('fs');
+const output = {
+  timestamp: new Date().toISOString(),
+  totalStudents: students.length,
+  noiseLevel: 1.2,
+  distribution: {},
+  accuracy: {},
+  overallAccuracy: overallAcc,
+  details: details.map(d => ({
+    id: d.id,
+    trueProfile: d.trueProfile,
+    predicted: d.predicted,
+    correct: d.correct,
+    scores: d.scores
+  }))
+};
+
+for (const [profile, count] of Object.entries(results)) {
+  output.distribution[profile] = {
+    count,
+    percentage: (count / students.length * 100).toFixed(1)
+  };
+}
+
+for (const p of profiles) {
+  const total = details.filter(d => d.trueProfile === p).length;
+  const correct = details.filter(d => d.trueProfile === p && d.correct).length;
+  output.accuracy[p] = {
+    total,
+    correct,
+    percentage: (correct / total * 100).toFixed(1)
+  };
+}
+
+fs.writeFileSync('simulation-results.json', JSON.stringify(output, null, 2));
+console.log('\n💾 Результаты сохранены в simulation-results.json');
