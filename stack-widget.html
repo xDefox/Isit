@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Стек кафедры ИСиТ — ВГТУ</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", system-ui, sans-serif; }
+    body { background: #0f1a2e; color: #e8eef8; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Header */
+    header { padding: clamp(16px, 2vw, 32px) clamp(20px, 3vw, 60px); background: linear-gradient(135deg, #13243e 0%, #0d1828 100%); border-bottom: 2px solid #0066cc; position: relative; overflow: hidden; }
+    header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 0%, rgba(0,102,204,0.15) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(0,153,255,0.1) 0%, transparent 50%); pointer-events: none; }
+    .header-content { max-width: 1600px; margin: 0 auto; display: flex; align-items: center; gap: clamp(16px, 2vw, 40px); flex-wrap: wrap; position: relative; z-index: 1; }
+    .logo { width: clamp(50px, 6vw, 80px); height: clamp(50px, 6vw, 80px); background: linear-gradient(135deg, #0066cc, #0099ff); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: clamp(24px, 3vw, 36px); box-shadow: 0 8px 32px rgba(0,102,204,0.4); flex-shrink: 0; }
+    .title-block { flex: 1; min-width: 200px; }
+    h1 { font-size: clamp(1.6rem, 2.5vw, 2.8rem); font-weight: 700; line-height: 1.2; background: linear-gradient(90deg, #fff, #8ab4f8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .subtitle { font-size: clamp(0.9rem, 1.2vw, 1.1rem); color: #8ab4f8; margin-top: 4px; font-weight: 400; }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .badge { background: rgba(0,102,204,0.2); border: 1px solid #0066cc; color: #a8d0ff; padding: 6px 14px; border-radius: 20px; font-size: clamp(0.7rem, 0.9vw, 0.85rem); font-weight: 500; }
+    
+    /* Main */
+    main { flex: 1; padding: clamp(20px, 2.5vw, 40px) clamp(20px, 3vw, 60px); display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: clamp(16px, 2vw, 28px); max-width: 1800px; margin: 0 auto; width: 100%; }
+    
+    /* Cluster Card */
+    .cluster { background: linear-gradient(145deg, #142840 0%, #0e1d33 100%); border: 1px solid #1e3a5c; border-radius: 20px; overflow: hidden; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; position: relative; min-height: 280px; display: flex; flex-direction: column; }
+    .cluster:hover { transform: translateY(-6px) scale(1.015); box-shadow: 0 20px 50px rgba(0,102,204,0.25); border-color: #0066cc; }
+    .cluster:focus-visible { outline: 2px solid #0099ff; outline-offset: 3px; }
+    .cluster-header { padding: clamp(16px, 2vw, 24px); display: flex; align-items: flex-start; gap: 16px; border-bottom: 1px solid #1e3a5c; min-height: 120px; }
+    .cluster-icon { width: clamp(56px, 7vw, 72px); height: clamp(56px, 7vw, 72px); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: clamp(24px, 3vw, 32px); flex-shrink: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .cluster-info { flex: 1; min-width: 0; }
+    .cluster-name { font-size: clamp(1.1rem, 1.4vw, 1.35rem); font-weight: 700; margin-bottom: 6px; }
+    .cluster-desc { font-size: clamp(0.8rem, 1vw, 0.9rem); color: #94b8e8; line-height: 1.5; }
+    .cluster-count { font-size: clamp(0.7rem, 0.85vw, 0.8rem); color: #0099ff; font-weight: 600; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; }
+    .cluster-count::before { content: ''; width: 8px; height: 8px; background: #0099ff; border-radius: 50%; box-shadow: 0 0 12px #0099ff; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .cluster-expand-hint { margin-left: auto; color: #5a8fd6; font-size: clamp(18px, 2.2vw, 24px); transition: transform 0.3s; flex-shrink: 0; }
+    .cluster.expanded .cluster-expand-hint { transform: rotate(180deg); }
+    
+    /* Expanded content */
+    .cluster-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 0.3s; background: rgba(0,0,0,0.15); }
+    .cluster.expanded .cluster-body { max-height: 800px; padding: 0 0 20px; }
+    .cluster-sections { padding: 20px clamp(16px, 2vw, 24px) 0; display: grid; gap: 16px; }
+    .section { background: rgba(255,255,255,0.03); border: 1px solid #1e3a5c; border-radius: 12px; overflow: hidden; }
+    .section-header { padding: 12px 16px; background: rgba(0,102,204,0.1); border-bottom: 1px solid #1e3a5c; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: clamp(0.85rem, 1vw, 0.95rem); color: #a8d0ff; }
+    .section-header svg { flex-shrink: 0; }
+    .section-content { padding: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { background: rgba(0,102,204,0.15); border: 1px solid #0066cc; color: #cfe3ff; padding: 6px 12px; border-radius: 8px; font-size: clamp(0.7rem, 0.85vw, 0.8rem); transition: all 0.2s; cursor: default; }
+    .tag:hover { background: #0066cc; border-color: #0099ff; transform: translateY(-1px); }
+    .tag.project { background: rgba(0,180,120,0.15); border-color: #00b478; color: #8effc8; }
+    .tag.project:hover { background: #00b478; border-color: #00ff99; }
+    .tag.partner { background: rgba(255,170,0,0.15); border-color: #ffaa00; color: #ffe080; }
+    .tag.partner:hover { background: #ffaa00; border-color: #ffcc00; color: #1a1a1a; }
+    .tag.graduate { background: rgba(180,100,255,0.15); border-color: #b464ff; color: #e8cfff; }
+    .tag.graduate:hover { background: #b464ff; border-color: #cc88ff; }
+    
+    /* QR Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.2s ease; }
+    .modal-overlay.visible { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal { background: #142840; border: 2px solid #0066cc; border-radius: 20px; padding: clamp(20px, 3vw, 32px); max-width: 400px; width: 100%; text-align: center; animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .modal h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); margin-bottom: 8px; background: linear-gradient(90deg, #fff, #8ab4f8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .modal p { color: #94b8e8; margin-bottom: 20px; font-size: clamp(0.9rem, 1.1vw, 1rem); }
+    .qr-placeholder { width: 200px; height: 200px; margin: 0 auto 20px; background: #fff; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .qr-placeholder svg { width: 140px; height: 140px; }
+    .qr-note { font-size: 0.75rem; color: #666; }
+    .modal-close { background: #0066cc; color: #fff; border: none; padding: 12px 32px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+    .modal-close:hover { background: #0099ff; }
+    .modal-close:active { transform: scale(0.97); }
+    
+    /* Footer */
+    footer { padding: clamp(16px, 2vw, 24px); text-align: center; color: #5a7a9a; font-size: clamp(0.75rem, 0.9vw, 0.85rem); border-top: 1px solid #1e3a5c; background: #0d1828; }
+    footer a { color: #0099ff; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    
+    /* Large screens (4K+) */
+    @media (min-width: 1920px) {
+      main { grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; }
+      .cluster { min-height: 320px; }
+    }
+    @media (min-width: 2560px) {
+      main { grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 28px; }
+      .cluster { min-height: 360px; }
+    }
+    @media (min-width: 3840px) {
+      main { grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 32px; }
+      .cluster { min-height: 400px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo" aria-hidden="true">🐴</div>
+      <div class="title-block">
+        <h1>Кафедра ИСиТ — Стек технологий и направления</h1>
+        <p class="subtitle">Информационные системы и технологии • ВГТУ • Специальность 6-05-0611-01</p>
+        <div class="badges">
+          <span class="badge">Бакалавриат 4 года</span>
+          <span class="badge">Заочно 3.5 года</span>
+          <span class="badge">Инженер-программист</span>
+          <span class="badge">70+ дисциплин</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="clustersGrid" role="list" aria-label="Технологические кластеры кафедры"></main>
+
+  <footer>
+    <p>Кафедра Информационных систем и технологий • ВГТУ • <a href="https://isit.vstu.by/" target="_blank">isit.vstu.by</a> • Данные актуальны на 2026 год</p>
+  </footer>
+
+  <!-- QR Modal -->
+  <div class="modal-overlay" id="qrModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h3 id="modalTitle">QR код</h3>
+      <p id="modalDesc">Отсканируй для перехода</p>
+      <div class="qr-placeholder" id="qrPlaceholder">
+        <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="140" height="140" fill="white"/>
+          <g fill="#0066cc">
+            <rect x="10" y="10" width="120" height="120"/>
+            <rect x="20" y="20" width="100" height="100" fill="white"/>
+            <rect x="30" y="30" width="80" height="80"/>
+            <rect x="40" y="40" width="60" height="60" fill="white"/>
+            <rect x="50" y="50" width="40" height="40"/>
+            <rect x="60" y="60" width="20" height="20" fill="white"/>
+            <rect x="65" y="65" width="10" height="10"/>
+          </g>
+          <text x="70" y="130" text-anchor="middle" font-size="10" fill="#666" font-family="monospace">QR PLACEHOLDER</text>
+        </svg>
+        <span class="qr-note">Вставьте реальный QR через настройку</span>
+      </div>
+      <button class="modal-close" id="modalClose">Закрыть</button>
+    </div>
+  </div>
+
+  <script>
+    // ===== DATA =====
+    const clusters = [
+      {
+        id: "web",
+        name: "Web-разработка",
+        desc: "Фронтенд, бэкенд, полные стеки — от лендингов до высоконагруженных сервисов",
+        icon: "🌐",
+        color: "linear-gradient(135deg, #0066cc, #0099ff)",
+        count: 12,
+        disciplines: [
+          "Веб-технологии",
+          "Современные технологии разработки web-приложений",
+          "Скриптовые языки программирования",
+          "Разработка серверных приложений",
+          "Технологии продвижения информационных ресурсов",
+          "Специализированные языки разметки документов"
+        ],
+        projects: [
+          "Портал кафедры (React + Node.js)",
+          "Система расписания ВГТУ",
+          "LMS для дистанционки"
+        ],
+        partners: ["Innowise", "iTechArt", "EPAM"],
+        graduates: ["React-разработчик в Innowise", "Fullstack в EPAM", "Frontend в IBA"],
+        qr: "https://github.com/isit-vstu"
+      },
+      {
+        id: "dotnet",
+        name: ".NET / C# экосистема",
+        desc: "Энтерпрайз, десктоп, микросервисы — стек для крупных корпоративных систем",
+        icon: "💜",
+        color: "linear-gradient(135deg, #512bd4, #9b59b6)",
+        count: 10,
+        disciplines: [
+          "Объектно-ориентированное программирование",
+          "Технологии компонентного программирования",
+          "Современные средства разработки серверных приложений",
+          "Архитектура информационных систем",
+          "Технологии проектирования ПО ИС",
+          "Управление разработкой ПО"
+        ],
+        projects: [
+          "SCADA для ОВЕН (C#, Modbus)",
+          "1С-интеграции ПКБ «Витебск»",
+          "Бухгалтерский комплекс ПКБ"
+        ],
+        partners: ["ПКБ «Витебск»", "1С", "ОВЕН"],
+        graduates: ["C# .NET в ПКБ «Витебск»", "Backend в банке", "1С-разработчик"],
+        qr: "https://github.com/isit-vstu/dotnet"
+      },
+      {
+        id: "java",
+        name: "Java / Spring",
+        desc: "Высоконагруженные бэкенды, микросервисы, облачные нативные приложения",
+        icon: "☕",
+        color: "linear-gradient(135deg, #e67e22, #f39c12)",
+        count: 8,
+        disciplines: [
+          "Объектно-ориентированное программирование",
+          "Программирование сетевых приложений",
+          "Распределенные системы обработки информации",
+          "Современные технологии разработки ПО",
+          "Системный анализ и проектирование ИС"
+        ],
+        projects: [
+          "Микросервисная платформа стажировок",
+          "API-шлюз для партнёров",
+          "Система мониторинга оборудования"
+        ],
+        partners: ["Innowise", "IBA", "EPAM"],
+        graduates: ["Java-разработчик в Innowise", "Spring Boot в EPAM", "Backend в IBA"],
+        qr: "https://github.com/isit-vstu/java"
+      },
+      {
+        id: "python",
+        name: "Python / Data / AI",
+        desc: "Data Science, ML, компьютерное зрение, автоматизация, научные расчёты",
+        icon: "🐍",
+        color: "linear-gradient(135deg, #306998, #3e8ed0)",
+        count: 10,
+        disciplines: [
+          "Искусственный интеллект",
+          "Компьютерное зрение и распознавание образов",
+          "Мат. моделирование объектов управления",
+          "Методы управления в сложных системах",
+          "Современные методы организации работы над проектом",
+          "Теория оптимальных систем"
+        ],
+        projects: [
+          "Компьютерное зрение дефектов (OpenCV)",
+          "Прогнозирование отказов оборудования",
+          "Бот профориентации (Telegram API)"
+        ],
+        partners: ["KUKA", "Научные лаборатории ВГТУ", "ОИПИ НАН Беларуси"],
+        graduates: ["ML Engineer", "Data Scientist", "Python-разработчик автоматизации"],
+        qr: "https://github.com/isit-vstu/python"
+      },
+      {
+        id: "database",
+        name: "Базы данных и аналитика",
+        desc: "Проектирование БД, СУБД, Data Warehouse, BI, поддержка решений",
+        icon: "🗄️",
+        color: "linear-gradient(135deg, #00b478, #00d48a)",
+        count: 8,
+        disciplines: [
+          "Базы данных",
+          "Проектирование баз данных",
+          "Современные системы управления БД",
+          "Базы знаний и поддержка принятия решений",
+          "Экономико-математические методы в системном анализе",
+          "Планирование эксперимента"
+        ],
+        projects: [
+          "DWH для отчётности деканата",
+          "Аналитическая панель HR (Power BI)",
+          "Миграция легаси на PostgreSQL"
+        ],
+        partners: ["ПКБ «Витебск»", "Банковский сектор", "Гос. заказчики"],
+        graduates: ["DBA / Data Engineer", "BI-аналитик", "1С-разработчик (БД)"],
+        qr: "https://github.com/isit-vstu/database"
+      },
+      {
+        id: "mobile",
+        name: "Мобильная разработка",
+        desc: "Android, кроссплатформенные приложения, мобильные интерфейсы",
+        icon: "📱",
+        color: "linear-gradient(135deg, #3ddc84, #00c853)",
+        count: 6,
+        disciplines: [
+          "Разработка мобильных приложений: Android SDK",
+          "Разработка мультимедийных приложений",
+          "Разработка пользовательского интерфейса",
+          "Современные технологии разработки web-приложений (PWA)",
+          "Технологии компонентного программирования"
+        ],
+        projects: [
+          "Приложение «Расписание ВГТУ» (React Native)",
+          "Мобильный клиент SCADA",
+          "PWA для профориентации"
+        ],
+        partners: ["Innowise", "Мобильные команды ПКБ", "Стартапы студентов"],
+        graduates: ["Android-разработчик", "React Native разработчик", "Flutter-разработчик"],
+        qr: "https://github.com/isit-vstu/mobile"
+      },
+      {
+        id: "security",
+        name: "Кибербезопасность и сети",
+        desc: "Защита информации, сетевые технологии, криптография, безопасность ПО",
+        icon: "🔐",
+        color: "linear-gradient(135deg, #e74c3c, #c0392b)",
+        count: 7,
+        disciplines: [
+          "Защита информации в компьютерных системах",
+          "Инновационные технологии обеспечения компьютерной безопасности",
+          "Компьютерные сети",
+          "Технологии поиска, передачи и защиты данных",
+          "Системное программирование",
+          "Архитектура операционных систем"
+        ],
+        projects: [
+          "Аудит безопасности веб-порталов",
+          "VPN-инфраструктура кафедры",
+          "Secure CI/CD pipeline"
+        ],
+        partners: ["ОИПИ НАН Беларуси", "Гос. органы защиты информации", "Kaspersky Academy"],
+        graduates: ["Security Engineer", "SOC-аналитик", "DevSecOps"],
+        qr: "https://github.com/isit-vstu/security"
+      },
+      {
+        id: "embedded",
+        name: "Встраиваемые системы и IoT",
+        desc: "Микроконтроллеры, ПЛК, SCADA, промышленная автоматизация, робототехника",
+        icon: "⚙️",
+        color: "linear-gradient(135deg, #34495e, #2c3e50)",
+        count: 7,
+        disciplines: [
+          "Компьютерные системы конечноэлементных расчетов",
+          "Компьютерная поддержка инженерного анализа",
+          "Технические средства информационных систем",
+          "Организация и функционирование ЭВМ",
+          "Модели и методы поддержки принятия решений",
+          "Системный анализ в научных исследованиях"
+        ],
+        projects: [
+          "SCADA ОВЕН Телемеханика ЛАЙТ",
+          "Роботы KUKA — лабораторные стенды",
+          "IoT-мониторинг оборудования цеха"
+        ],
+        partners: ["ОВЕН", "KUKA", "ПКБ «Витебск»", "Промышленные предприятия"],
+        graduates: ["Embedded-разработчик", "Автоматизация (ПЛК/SCADA)", "IoT-инженер"],
+        qr: "https://github.com/isit-vstu/embedded"
+      },
+      {
+        id: "uiux",
+        name: "UI/UX и графика",
+        desc: "Интерфейсы, компьютерная графика, мультимедиа, пользовательский опыт",
+        icon: "🎨",
+        color: "linear-gradient(135deg, #e91e63, #ad1457)",
+        count: 6,
+        disciplines: [
+          "Компьютерная графика",
+          "Системы компьютерной графики",
+          "Разработка пользовательского интерфейса приложений",
+          "Информатика и компьютерная графика",
+          "Разработка мультимедийных приложений",
+          "Средства визуального программирования"
+        ],
+        projects: [
+          "Дизайн-система портала кафедры",
+          "Интерактивные стенды Дней открытых дверей",
+          "Визуализация данных для SCADA"
+        ],
+        partners: ["Дизайн-команды Innowise", "Студии UX", "Фриланс-проекты"],
+        graduates: ["UI/UX-дизайнер", "Motion-дизайнер", "Frontend с уклоном в UI"],
+        qr: "https://github.com/isit-vstu/uiux"
+      }
+    ];
+
+    // ===== RENDER =====
+    const grid = document.getElementById('clustersGrid');
+    grid.innerHTML = clusters.map(c => `
+      <article class="cluster" data-id="${c.id}" role="listitem" tabindex="0" aria-expanded="false">
+        <div class="cluster-header">
+          <div class="cluster-icon" style="background: ${c.color}" aria-hidden="true">${c.icon}</div>
+          <div class="cluster-info">
+            <h2 class="cluster-name">${c.name}</h2>
+            <p class="cluster-desc">${c.desc}</p>
+            <span class="cluster-count">${c.count} дисциплин</span>
+          </div>
+          <span class="cluster-expand-hint" aria-hidden="true">▼</span>
+        </div>
+        <div class="cluster-body">
+          <div class="cluster-sections">
+            <section class="section">
+              <header class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                Дисциплины
+              </header>
+              <div class="section-content">
+                ${c.disciplines.map(d => `<span class="tag">${d}</span>`).join('')}
+              </div>
+            </section>
+            <section class="section">
+              <header class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+                Проекты студентов
+              </header>
+              <div class="section-content">
+                ${c.projects.map(p => `<span class="tag project">${p}</span>`).join('')}
+              </div>
+            </section>
+            <section class="section">
+              <header class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Партнёры и практика
+              </header>
+              <div class="section-content">
+                ${c.partners.map(p => `<span class="tag partner">${p}</span>`).join('')}
+              </div>
+            </section>
+            <section class="section">
+              <header class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Куда идут выпускники
+              </header>
+              <div class="section-content">
+                ${c.graduates.map(g => `<span class="tag graduate">${g}</span>`).join('')}
+              </div>
+            </section>
+          </div>
+        </div>
+      </article>
+    `).join('');
+
+    // ===== INTERACTIONS =====
+    const clusters_elements = grid.querySelectorAll('.cluster');
+    const modal = document.getElementById('qrModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalClose = document.getElementById('modalClose');
+
+    let expandedCluster = null;
+
+    function openQR(cluster) {
+      modalTitle.textContent = cluster.name;
+      modalDesc.textContent = `Репозитории и материалы по направлению «${cluster.name}»`;
+      modal.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeQR() {
+      modal.classList.remove('visible');
+      document.body.style.overflow = '';
+    }
+
+    clusters_elements.forEach(el => {
+      const cluster = clusters.find(c => c.id === el.dataset.id);
+      
+      // Click/tap on header -> toggle expand
+      const header = el.querySelector('.cluster-header');
+      header.addEventListener('click', (e) => {
+        if (e.target.closest('.cluster-expand-hint')) return; // don't toggle on hint click
+        const isExpanded = el.classList.toggle('expanded');
+        el.setAttribute('aria-expanded', isExpanded);
+        expandedCluster = isExpanded ? el : null;
+      });
+      
+      // Keyboard support
+      header.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          header.click();
+        }
+      });
+      
+      // Double-click / long press on card -> QR
+      let pressTimer;
+      header.addEventListener('mousedown', () => {
+        pressTimer = setTimeout(() => openQR(cluster), 500);
+      });
+      header.addEventListener('mouseup', () => clearTimeout(pressTimer));
+      header.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+      header.addEventListener('touchstart', () => {
+        pressTimer = setTimeout(() => openQR(cluster), 500);
+      }, { passive: true });
+      header.addEventListener('touchend', () => clearTimeout(pressTimer));
+      
+      // Also allow clicking the expand hint to show QR
+      const hint = el.querySelector('.cluster-expand-hint');
+      hint.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openQR(cluster);
+      });
+      hint.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          openQR(cluster);
+        }
+      });
+    });
+
+    modalClose.addEventListener('click', closeQR);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeQR(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('visible')) closeQR(); });
+
+    // Entrance animation
+    clusters_elements.forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      setTimeout(() => {
+        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, i * 60);
+    });
+
+    // Auto-reset expanded on resize (mobile/desktop switch)
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (expandedCluster && window.innerWidth < 768) {
+          expandedCluster.classList.remove('expanded');
+          expandedCluster.setAttribute('aria-expanded', 'false');
+          expandedCluster = null;
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>
