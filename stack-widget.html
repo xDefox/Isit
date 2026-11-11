@@ -19,7 +19,7 @@
     .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
     .badge { background: rgba(0,102,204,0.2); border: 1px solid #0066cc; color: #a8d0ff; padding: 6px 14px; border-radius: 20px; font-size: clamp(0.7rem, 0.9vw, 0.85rem); font-weight: 500; }
     
-    /* Main grid - auto-fit like original */
+    /* Main grid - auto-fit */
     main { flex: 1; padding: clamp(20px, 2.5vw, 40px) clamp(20px, 3vw, 60px); display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: clamp(16px, 2vw, 28px); max-width: 1800px; margin: 0 auto; width: 100%; }
     
     /* Cluster card */
@@ -37,17 +37,17 @@
     .cluster-expand-hint { margin-left: auto; color: #5a8fd6; font-size: clamp(18px, 2.2vw, 24px); transition: transform 0.3s; flex-shrink: 0; }
     .cluster.expanded .cluster-expand-hint { transform: rotate(180deg); }
     
-    /* === РАЗДЕЛ: Раскрывающийся блок с внутренним скроллом === */
+    /* === Раскрывающийся блок со скроллом === */
     .cluster-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 0.3s; background: rgba(0,0,0,0.15); flex: 1; display: flex; flex-direction: column; }
     .cluster.expanded .cluster-body { max-height: 60vh; padding: 0 0 20px; }
     .cluster-sections { padding: 20px clamp(16px, 2vw, 24px) 0; display: grid; gap: 16px; overflow-y: auto; max-height: calc(60vh - 40px); }
     
-    /* Sections inside */
+    /* Sections */
     .section { background: rgba(255,255,255,0.03); border: 1px solid #1e3a5c; border-radius: 12px; overflow: hidden; }
     .section-header { padding: 12px 16px; background: rgba(0,102,204,0.1); border-bottom: 1px solid #1e3a5c; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: clamp(0.85rem, 1vw, 0.95rem); color: #a8d0ff; }
     .section-header svg { flex-shrink: 0; }
     .section-content { padding: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
-    .tag { background: rgba(0,102,204,0.15); border: 1px solid #0066cc; color: #cfe3ff; padding: 6px 12px; border-radius: 8px; font-size: clamp(0.7rem, 0.85vw, 0.8rem); transition: all 0.2s; cursor: default; }
+    .tag { background: rgba(0,102,204,0.15); border: 1x solid #0066cc; color: #cfe3ff; padding: 6px 12px; border-radius: 8px; font-size: clamp(0.7rem, 0.85vw, 0.8rem); transition: all 0.2s; cursor: default; }
     .tag:hover { background: #0066cc; border-color: #0099ff; transform: translateY(-1px); }
     .tag.project { background: rgba(0,180,120,0.15); border-color: #00b478; color: #8effc8; }
     .tag.project:hover { background: #00b478; border-color: #00ff99; }
@@ -96,7 +96,6 @@
           <span class="badge">Бакалавриат 4 года</span>
           <span class="badge">Заочно 3.5 года</span>
           <span class="badge">Инженер-программист</span>
-          <span class="badge">70+ дисциплин</span>
         </div>
       </div>
     </div>
@@ -134,11 +133,11 @@
   </div>
 
   <script>
-    // ===== DATA =====
+    // ===== DATA FROM isit.vstu.by =====
     const clusters = [
       {
-        id: "web", name: "Web-разработка", desc: "Фронтенд, бэкенд, полные стеки — от лендингов до высоконагруженных сервисов", icon: "🌐", color: "linear-gradient(135deg, #0066cc, #0099ff)", count: 10,
-        disciplines: ["Веб-технологии", "Современные технологии разработки web-приложений", "Скриптовые языки программирования", "Разработка серверных приложений", "Технологии продвижения информационных ресурсов", "Специализированные языки разметки документов", "Разработка пользовательского интерфейса приложений", "Технологии компонентного программирования", "Фреймворки: React, Vue, Angular", "Бэкенд: Node.js, Python, PHP"],
+        id: "web", name: "Web-разработка", desc: "Фронтенд, бэкенд, полные стеки — от лендингов до высоконагруженных сервисов", icon: "🌐", color: "linear-gradient(135deg, #0066cc, #0099ff)", count: 12,
+        disciplines: ["Веб-технологии", "Современные технологии разработки web-приложений", "Скриптовые языки программирования", "Разработка серверных приложений", "Технологии продвижения информационных ресурсов", "Специализированные языки разметки документов", "Разработка пользовательского интерфейса приложений", "Технологии компонентного программирования", "Фреймворки: React, Vue, Angular", "Бэкенд: Node.js, Python, PHP", "Информатика и компьютерная графика", "Современные средства разработки серверных приложений"],
         projects: ["Портал кафедры (React + Node.js)", "Система расписания ВГТУ", "LMS для дистанционного обучения", "Панель профориентации", "Интерактивные стенды ДОД"],
         partners: ["Innowise", "iTechArt", "EPAM", "IBA Group"],
         graduates: ["React-разработчик в Innowise", "Fullstack в EPAM", "Frontend в IBA", "React Native разработчик", "Vue-разработчик в стартапе"],
@@ -153,7 +152,7 @@
         qr: "https://github.com/isit-vstu/dotnet"
       },
       {
-        id: "java", name: "Java / Spring", desc: "Высоконагруженные бэкенды, микросервисы, облачные нативные приложения", icon: "☕", color: "linear-gradient(135deg, #e67e22, #f39c12)", count: 10,
+        id: "java", name: "Java / Spring", desc: "Высоконагруженные бэкенды, микросервисы, облачные нативные приложения", icon: "☕", color: "linear-gradient(135deg, #e67e22, #f39c12)", count: 8,
         disciplines: ["Объектно-ориентированное программирование", "Программирование сетевых приложений", "Распределенные системы обработки информации", "Современные технологии разработки ПО", "Системный анализ и проектирование ИС"],
         projects: ["Микросервисная платформа стажировок", "API-шлюз для партнёров", "Система мониторинга оборудования", "Event-driven архитектура для IoT"],
         partners: ["Innowise", "IBA", "EPAM", "Банковский сектор"],
@@ -169,7 +168,7 @@
         qr: "https://github.com/isit-vstu/python"
       },
       {
-        id: "database", name: "Базы данных и аналитика", desc: "Проектирование БД, СУБД, Data Warehouse, BI, поддержка решений", icon: "🗄️", color: "linear-gradient(135deg, #00b478, #00d48a)", count: 10,
+        id: "database", name: "Базы данных и аналитика", desc: "Проектирование БД, СУБД, Data Warehouse, BI, поддержка решений", icon: "🗄️", color: "linear-gradient(135deg, #00b478, #00d48a)", count: 8,
         disciplines: ["Базы данных", "Проектирование баз данных", "Современные системы управления БД", "Базы знаний и поддержка принятия решений", "Экономико-математические методы в системном анализе", "Планирование эксперимента", "Системный анализ в научных исследованиях", "Data Warehouse", "BI и визуализация", "Migration и интеграция"],
         projects: ["DWH для отчётности деканата", "Аналитическая панель HR (Power BI)", "Миграция легаси на PostgreSQL", "ETL-пайплайны для 1С"],
         partners: ["ПКБ «Витебск»", "Банковский сектор", "Гос. заказчики", "BI-команды"],
@@ -177,15 +176,15 @@
         qr: "https://github.com/isit-vstu/database"
       },
       {
-        id: "mobile", name: "Мобильная разработка", desc: "Android, кроссплатформенные приложения, мобильные интерфейсы", icon: "📱", color: "linear-gradient(135deg, #3ddc84, #00c853)", count: 10,
-        disciplines: ["Разработка мобильных приложений: Android SDK", "Разработка мультимедийных приложений", "Разработка пользовательского интерфейса", "Современные технологии разработки web-приложений (PWA)", "Технологии компонентного программирования", "Кроссплатформенная разработка", "Мобильная архитектура", "App Store / Google Play guidelines", "UI/UX для мобильных", "Перфоманс-оптимизация мобильных"],
+        id: "mobile", name: "Мобильная разработка", desc: "Android, кроссплатформенные приложения, мобильные интерфейсы", icon: "📱", color: "linear-gradient(135deg, #3ddc84, #00c853)", count: 6,
+        disciplines: ["Разработка мобильных приложений: Android SDK", "Разработка мультимедийных приложения", "Разработка пользовательского интерфейса", "Современные технологии разработки web-приложения (PWA)", "Технологии компонентного программирования", "Кроссплатформенная разработка", "Мобильная архитектура", "App Store / Google Play guidelines", "UI/UX для мобильных", "Перфーマンс-оптимизация мобильных"],
         projects: ["Приложение «Расписание ВГТУ» (React Native)", "Мобильный клиент SCADA", "PWA для профориентации", "Android-приложение для учёта практики"],
         partners: ["Innowise", "Мобильные команды ПКБ", "Стартапы студентов", "App Store / Google Play"],
         graduates: ["Android-разработчик", "React Native разработчик", "Flutter-разработчик", "iOS-разработчик (Swift)"],
         qr: "https://github.com/isit-vstu/mobile"
       },
       {
-        id: "security", name: "Кибербезопасность и сети", desc: "Защита информации, сетевые технологии, криптография, безопасность ПО", icon: "🔐", color: "linear-gradient(135deg, #e74c3c, #c0392b)", count: 10,
+        id: "security", name: "Кибербезопасность и сети", desc: "Защита информации, сетевые технологии, криптография, безопасность ПО", icon: "🔐", color: "linear-gradient(135deg, #e74c3c, #c0392b)", count: 7,
         disciplines: ["Защита информации в компьютерных системах", "Инновационные технологии обеспечения компьютерной безопасности", "Компьютерные сети", "Технологии поиска, передачи и защиты данных", "Системное программирование", "Архитектура операционных систем", "Тестирование программного обеспечения", "Криптография и хеширование", "SIEM-системы", "Pen-testing и аудит"],
         projects: ["Аудит безопасности веб-порталов", "VPN-инфраструктура кафедры", "Secure CI/CD pipeline", "SIEM для мониторинга инцидентов"],
         partners: ["ОИПИ НАН Беларуси", "Гос. органы защиты информации", "Kaspersky Academy", "Positive Technologies"],
@@ -193,7 +192,7 @@
         qr: "https://github.com/isit-vstu/security"
       },
       {
-        id: "embedded", name: "Встраиваемые системы и IoT", desc: "Микроконтроллеры, ПЛК, SCADA, промышленная автоматизация, робототехника", icon: "⚙️", color: "linear-gradient(135deg, #34495e, #2c3e50)", count: 10,
+        id: "embedded", name: "Встраиваемые системы и IoT", desc: "Микроконтроллеры, ПЛК, SCADA, промышленная автоматизация, робототехника", icon: "⚙️", color: "linear-gradient(135deg, #34495e, #2c3e50)", count: 7,
         disciplines: ["Компьютерные системы конечноэлементных расчетов", "Компьютерная поддержка инженерного анализа", "Технические средства информационных систем", "Организация и функционирование ЭВМ", "Модели и методы поддержки принятия решений", "Системный анализ в научных исследованиях", "Оптимизация проектных решений", "ПЛК и автоматизация", "IoT-бrazеры", "Интеграция с ERP"],
         projects: ["SCADA ОВЕН Телемеханика ЛАЙТ", "Роботы KUKA — лабораторные стенды", "IoT-мониторинг оборудования цеха", "ПЛК-программирование (Codesys)"],
         partners: ["ОВЕН", "KUKA", "ПКБ «Витебск»", "Промышленные предприятия", "Робототехнические клубы"],
@@ -201,8 +200,8 @@
         qr: "https://github.com/isit-vstu/embedded"
       },
       {
-        id: "uiux", name: "UI/UX и графика", desc: "Интерфейсы, компьютерная графика, мультимедиа, пользовательский опыт", icon: "🎨", color: "linear-gradient(135deg, #e91e63, #ad1457)", count: 10,
-        disciplines: ["Компьютерная графика", "Системы компьютерной графики", "Разработка пользовательского интерфейса приложений", "Информатика и компьютерная графика", "Разработка мультимедийных приложений", "Средства визуального программирования", "UI-дизайн", "Motion-дизайн", "Usability-тестирование", "Prototyping инструменты"],
+        id: "uiux", name: "UI/UX и графика", desc: "Интерфейсы, компьютерная графика, мультимедиа, пользовательский опыт", icon: "🎨", color: "linear-gradient(135deg, #e91e63, #ad1457)", count: 6,
+        disciplines: ["Компьютерная графика", "Системы компьютерной графики", "Разработка пользовательского интерфейса приложений", "Информатика и компьютерная графика", "Разработка мультимедийных приложения", "Средства визуального программирования", "UI-дизайн", "Motion-дизайн", "Usability-тестирование", "Prototyping инструменты"],
         projects: ["Дизайн-система портала кафедры", "Интерактивные стенды Дней открытых дверей", "Визуализация данных для SCADA", "Моушн-дизайн для презентаций"],
         partners: ["Дизайн-команды Innowise", "Студии UX", "Фриланс-проекты", "Маркетинговые агентства"],
         graduates: ["UI/UX-дизайнер", "Motion-дизайнер", "Frontend с уклоном в UI", "Product Designer", "Графический дизайнер IT"],
@@ -221,7 +220,7 @@
             <p class="cluster-desc">${c.desc}</p>
             <span class="cluster-count">${c.count} дисциплин</span>
           </div>
-          <span class="cluster-expand-hint" aria-hidden="true" title="Раскрыть полностью (или долгий тап)">▼</span>
+          <span class="cluster-expand-hint" aria-hidden="true" title="Раскрыть完全 (или долгий тап)">▼</span>
         </div>
         <div class="cluster-body">
           <div class="cluster-sections">
@@ -281,8 +280,6 @@
       modalDesc.textContent = `Репозитории и материалы по направлению «${cluster.name}»`;
       modal.classList.add('visible');
       document.body.style.overflow = 'hidden';
-      // Можно подставить реальный QR здесь, например:
-      // qrPlaceholder.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=140&data=${encodeURIComponent(cluster.qr)}" alt="${cluster.name}">`;
     }
 
     function closeQR() {
@@ -305,9 +302,8 @@
       const header = el.querySelector('.cluster-header');
       if (!header) return;
 
-      // Click/tap on header -> toggle expand
       header.addEventListener('click', (e) => {
-        if (e.target.closest('.cluster-expand-hint')) return; // don't toggle on hint explicitly if you want
+        if (e.target.closest('.cluster-expand-hint')) return;
         const isExpanded = el.classList.toggle('expanded');
         el.setAttribute('aria-expanded', isExpanded);
         if (isExpanded) {
@@ -318,7 +314,6 @@
         }
       });
 
-      // Keyboard support
       header.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -326,7 +321,6 @@
         }
       });
 
-      // Long press / double-tap -> QR
       let pressTimer;
       const startPress = () => { pressTimer = setTimeout(() => openQR(cluster), 500); };
       const endPress = () => clearTimeout(pressTimer);
@@ -336,7 +330,6 @@
       header.addEventListener('touchstart', startPress, { passive: true });
       header.addEventListener('touchend', endPress);
 
-      // Also allow clicking the hint area to show QR
       const hint = el.querySelector('.cluster-expand-hint');
       if (hint) {
         hint.addEventListener('click', (e) => { e.stopPropagation(); openQR(cluster); });
@@ -350,7 +343,6 @@
     modal.addEventListener('click', (e) => { if (e.target === modal) closeQR(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeQR(); collapseAll(); } });
 
-    // Entrance animation
     clusters_elements.forEach((el, i) => {
       el.style.opacity = '0';
       el.style.transform = 'translateY(30px)';
@@ -361,7 +353,6 @@
       }, i * 60);
     });
 
-    // Auto-reset expanded on resize if mobile
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
