@@ -38,6 +38,21 @@
     .tag:focus { outline: 2px solid #0099ff; outline-offset: 4px; }
     .tag:focus-visible { outline: 2px solid #0099ff; outline-offset: 4px; }
     
+    /* Modal overlay */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .modal-overlay.visible { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal { background: #142840; border: 2px solid #0066cc; border-radius: 20px; padding: clamp(24px, 4vw, 36px); max-width: 500px; width: 100%; text-align: center; animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .modal h3 { font-size: clamp(1.5rem, 2.5vw, 1.8rem); margin-bottom: 16px; background: linear-gradient(90deg, #fff, #8ab4f8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .modal p { color: #94b8e8; margin-bottom: 24px; font-size: clamp(0.9rem, 1.2vw, 1rem); line-height: 1.6; }
+    .modal .tags-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .modal .tag { background: rgba(0,102,204,0.1); border: 1px solid #0066cc; border-radius: 8px; padding: 6px 12px; font-size: clamp(0.7rem, 0.8vw, 0.75rem); color: #cfe3ff; margin: 2px; }
+    .modal .tag.project { background: rgba(0,180,120,0.1); border-color: #00b478; color: #8effc8; }
+    .modal-close { background: #0066cc; color: #fff; border: none; padding: 12px 24px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; width: 100%; }
+    .modal-close:hover { background: #0099ff; }
+    .modal-close:active { transform: scale(0.97); }
+    
     /* Footer */
     footer { padding: clamp(16px, 2vw, 24px); text-align: center; color: #5a7a9a; font-size: clamp(0.75rem, 0.9vw, 0.85rem); border-top: 1px solid #1e3a5c; background: #0d1828; }
     footer a { color: #0099ff; text-decoration: none; }
@@ -74,21 +89,31 @@
     <p>Данные с <a href="https://isit.vstu.by/" target="_blank">isit.vstu.by</a> • 2026</p>
   </footer>
 
+  <!-- Technology modal -->
+  <div class="modal-overlay" id="techModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h3 id="modalTitle">Технологии</h3>
+      <p id="modalDesc">Выберите технологию для просмотра проектов</p>
+      <div class="tags-list" id="modalTags"></div>
+      <button class="modal-close" id="modalClose">Закрыть</button>
+    </div>
+  </div>
+
   <script>
     // Технологии с сайта isit.vstu.by
     const technologies = [
-      { id: "web", name: "Web-разработка", desc: "Фронтенд, бэкенд, полные стеки", icon: "🌐" },
-      { id: "dotnet", name: ".NET / C#", desc: "Энтерпрайз, десктоп, микросервисы", icon: "💜" },
-      { id: "java", name: "Java / Spring", desc: "Высоконагруженные бэкенды", icon: "☕" },
-      { id: "python", name: "Python / Data / AI", desc: "Data Science, ML, автоматизация", icon: "🐍" },
-      { id: "database", name: "Базы данных", desc: "БД, Data Warehouse, BI", icon: "🗄️" },
-      { id: "mobile", name: "Мобильная разработка", desc: "Android, кроссплатформенные приложения", icon: "📱" },
-      { id: "security", name: "Кибербезопасность", desc: "Защита информации, сети", icon: "🔐" },
-      { id: "embedded", name: "Встраиваемые системы", desc: "ПЛК, SCADA, IoT, роботы", icon: "⚙️" },
-      { id: "uiux", name: "UI/UX и графика", desc: "Интерфейсы, дизайн, мультимедиа", icon: "🎨" }
+      { id: "web", name: "Web-разработка", desc: "Фронтенд, бэкенд, полные стеки", projects: ["Портал кафедры (React + Node.js)", "Система расписания ВГТУ", "LMS для дистанционного обучения", "Панель профориентации", "Интерактивные стенды ДОД"] },
+      { id: "dotnet", name: ".NET / C#", desc: "Энтерпрайз, десктоп, микросервисы", projects: ["SCADA для ОВЕН (C#, Modbus)", "1С-интеграции ПКБ «Витебск»", "Бухгалтерский комплекс ПКБ", "Автоматизация складского учёта", "Desktop-клиент для IoT"] },
+      { id: "java", name: "Java / Spring", desc: "Высоконагруженные бэкенды", projects: ["Микросервисная платформа стажировок", "API-шлюз для партнёров", "Система мониторинга оборудования", "Event-driven архитектура для IoT"] },
+      { id: "python", name: "Python / Data / AI", desc: "Data Science, ML, автоматизация", projects: ["Компьютерное зрение дефектов (OpenCV)", "Прогнозирование отказов оборудования", "Бот профориентации (Telegram API)", "ML-пайплайн для анализа логов", "Автоматизация отчётности (pandas)"] },
+      { id: "database", name: "Базы данных", desc: "БД, Data Warehouse, BI", projects: ["DWH для отчётности деканата", "Аналитическая панель HR (Power BI)", "Миграция легаси на PostgreSQL", "ETL-пайплайны для 1С"] },
+      { id: "mobile", name: "Мобильная разработка", desc: "Android, кроссплатформенные приложения", projects: ["Приложение «Расписание ВГТУ» (React Native)", "Мобильный клиент SCADA", "PWA для профориентации", "Android-приложение для учёта практики"] },
+      { id: "security", name: "Кибербезопасность", desc: "Защита информации, сети", projects: ["Аудит безопасности веб-порталов", "VPN-инфраструктура кафедры", "Secure CI/CD pipeline", "SIEM для мониторинга инцидентов"] },
+      { id: "embedded", name: "Встраиваемые системы", desc: "ПЛК, SCADA, IoT, роботы", projects: ["SCADA ОВЕН Телемеханика ЛАЙТ", "Роботы KUKA — лабораторные стенды", "IoT-мониторинг оборудования цеха", "ПЛК-программирование (Codesys)"] },
+      { id: "uiux", name: "UI/UX и графика", desc: "Интерфейсы, дизайн, мультимедиа", projects: ["Дизайн-система портала кафедры", "Интерактивные стенды Дней открытых дверей", "Визуализация данных для SCADA", "Моушн-дизайн для презентаций"] }
     ];
 
-    // Рендер тегов
+    // Рендер тегов в основной области
     const main = document.querySelector('main');
     main.innerHTML = technologies.map(t => `
       <article class="tag" data-id="${t.id}" role="button" tabindex="0" aria-label="${t.name}">
@@ -98,39 +123,68 @@
       </article>
     `).join('');
 
-    // Интерактивность
+    // Модальное окно
+    const modal = document.getElementById('techModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalTags = document.getElementById('modalTags');
+    const modalClose = document.getElementById('modalClose');
+
+    // Обработчик клика по тегу
     const tags = main.querySelectorAll('.tag');
     
     tags.forEach(tag => {
-      // Клик
       tag.addEventListener('click', () => {
-        // Удаляем focus у всех, добавляем нажатому
+        // Удаляем фокус у всех тегов
         tags.forEach(t => t.classList.remove('focus'));
+        // Добавляем фокус на нажатый
         tag.classList.add('focus');
         
-        // Простая реакция на клик (можно заменить на ссылку или модалку)
-        const name = tag.querySelector('.tag-name').textContent;
-        // window.location.href = `https://github.com/isit-vstu/${t.id}`;
-      });
-      
-      // Клавиатура
-      tag.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          tags.forEach(t => t.classList.remove('focus'));
-          tag.classList.add('focus');
-        }
-      });
-      
-      // Наведение
-      tag.addEventListener('mouseover', () => {
-        tag.classList.add('hover');
-      });
-      tag.addEventListener('mouseout', () => {
-        tag.classList.remove('hover');
+        // Находим данные технологии
+        const tech = technologies.find(t => t.id === tag.dataset.id);
+        if (!tech) return;
+        
+        // Заполняем модальное окно
+        modalTitle.textContent = tech.name;
+        modalDesc.textContent = tech.desc;
+        
+        // Очищаем и наполняем список тегов в модальном окне
+        modalTags.innerHTML = '';
+        tech.projects.forEach(project => {
+          const tagEl = document.createElement('span');
+          tagEl.className = 'tag project';
+          tagEl.textContent = project;
+          modalTags.appendChild(tagEl);
+        });
+        
+        // Показываем модальное окно
+        modal.classList.add('visible');
+        document.body.style.overflow = 'hidden';
       });
     });
-    
+
+    // Закрытие модального окна
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('visible');
+      document.body.style.overflow = '';
+    });
+
+    // Закрытие по клику вне модального окна
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('visible');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // Закрытие по Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('visible')) {
+        modal.classList.remove('visible');
+        document.body.style.overflow = '';
+      }
+    });
+
     // Автоматический фокус на первый тег при загрузке
     if (tags.length > 0) {
       tags[0].focus();
