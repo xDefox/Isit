@@ -6,7 +6,7 @@
   <title>Стек кафедры ИСиТ — ВГТУ</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", system-ui, sans-serif; }
-    body { background: #0f1a2e; color: #e8eef8; min-height: 100vh; display: flex; flex-direction: column; }
+    body { background: #0f1a2e; color: #e8eef8; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
     
     /* Header */
     header { padding: clamp(16px, 2vw, 32px) clamp(20px, 3vw, 60px); background: linear-gradient(135deg, #13243e 0%, #0d1828 100%); border-bottom: 2px solid #0066cc; position: relative; overflow: hidden; }
@@ -19,10 +19,10 @@
     .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
     .badge { background: rgba(0,102,204,0.2); border: 1px solid #0066cc; color: #a8d0ff; padding: 6px 14px; border-radius: 20px; font-size: clamp(0.7rem, 0.9vw, 0.85rem); font-weight: 500; }
     
-    /* Main - auto-fit grid как было */
-    main { flex: 1; padding: clamp(20px, 2.5vw, 40px) clamp(20px, 3vw, 60px); display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: clamp(16px, 2vw, 28px); max-width: 100%; margin: 0 auto; width: 100%; }
+    /* Main grid - auto-fit like original */
+    main { flex: 1; padding: clamp(20px, 2.5vw, 40px) clamp(20px, 3vw, 60px); display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: clamp(16px, 2vw, 28px); max-width: 1800px; margin: 0 auto; width: 100%; }
     
-    /* Cluster Card */
+    /* Cluster card */
     .cluster { background: linear-gradient(145deg, #142840 0%, #0e1d33 100%); border: 1px solid #1e3a5c; border-radius: 20px; overflow: hidden; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; position: relative; min-height: 280px; display: flex; flex-direction: column; }
     .cluster:hover { transform: translateY(-6px) scale(1.015); box-shadow: 0 20px 50px rgba(0,102,204,0.25); border-color: #0066cc; }
     .cluster:focus-visible { outline: 2px solid #0099ff; outline-offset: 3px; }
@@ -37,11 +37,12 @@
     .cluster-expand-hint { margin-left: auto; color: #5a8fd6; font-size: clamp(18px, 2.2vw, 24px); transition: transform 0.3s; flex-shrink: 0; }
     .cluster.expanded .cluster-expand-hint { transform: rotate(180deg); }
     
-    /* Expanded content - ИСПРАВЛЕННЫЙ ВАРИАНТ: max-height 60vh, скролл внутри */
+    /* === РАЗДЕЛ: Раскрывающийся блок с внутренним скроллом === */
     .cluster-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 0.3s; background: rgba(0,0,0,0.15); flex: 1; display: flex; flex-direction: column; }
     .cluster.expanded .cluster-body { max-height: 60vh; padding: 0 0 20px; }
     .cluster-sections { padding: 20px clamp(16px, 2vw, 24px) 0; display: grid; gap: 16px; overflow-y: auto; max-height: calc(60vh - 40px); }
     
+    /* Sections inside */
     .section { background: rgba(255,255,255,0.03); border: 1px solid #1e3a5c; border-radius: 12px; overflow: hidden; }
     .section-header { padding: 12px 16px; background: rgba(0,102,204,0.1); border-bottom: 1px solid #1e3a5c; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: clamp(0.85rem, 1vw, 0.95rem); color: #a8d0ff; }
     .section-header svg { flex-shrink: 0; }
@@ -76,23 +77,12 @@
     footer a:hover { text-decoration: underline; }
     
     /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     
-    /* Large screens (4K+) */
-    @media (min-width: 1920px) {
-      main { grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; }
-      .cluster { min-height: 320px; }
-    }
-    @media (min-width: 2560px) {
-      main { grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 28px; }
-      .cluster { min-height: 360px; }
-    }
-    @media (min-width: 3840px) {
-      main { grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 32px; }
-      .cluster { min-height: 400px; }
-    }
+    /* Large screens */
+    @media (min-width: 1920px) { main { grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; } .cluster { min-height: 320px; } }
+    @media (min-width: 2560px) { main { grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 28px; } .cluster { min-height: 360px; } }
+    @media (min-width: 3840px) { main { grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 32px; } .cluster { min-height: 400px; } }
   </style>
 </head>
 <body>
@@ -147,262 +137,73 @@
     // ===== DATA =====
     const clusters = [
       {
-        id: "web",
-        name: "Web-разработка",
-        desc: "Фронтенд, бэкенд, полные стеки — от лендингов до высоконагруженных сервисов",
-        icon: "🌐",
-        color: "linear-gradient(135deg, #0066cc, #0099ff)",
-        count: 10,
-        disciplines: [
-          "Веб-технологии",
-          "Современные технологии разработки web-приложений",
-          "Скриптовые языки программирования",
-          "Разработка серверных приложений",
-          "Технологии продвижения информационных ресурсов",
-          "Специализированные языки разметки документов",
-          "Разработка пользовательского интерфейса приложений",
-          "Технологии компонентного программирования",
-          "Фреймворки: React, Vue, Angular",
-          "Бэкенд: Node.js, Python, PHP"
-        ],
-        count: 10,
-        projects: [
-          "Портал кафедры (React + Node.js)",
-          "Система расписания ВГТУ",
-          "LMS для дистанционного обучения",
-          "Панель профориентации",
-          "Интерактивные стенды ДОД"
-        ],
+        id: "web", name: "Web-разработка", desc: "Фронтенд, бэкенд, полные стеки — от лендингов до высоконагруженных сервисов", icon: "🌐", color: "linear-gradient(135deg, #0066cc, #0099ff)", count: 10,
+        disciplines: ["Веб-технологии", "Современные технологии разработки web-приложений", "Скриптовые языки программирования", "Разработка серверных приложений", "Технологии продвижения информационных ресурсов", "Специализированные языки разметки документов", "Разработка пользовательского интерфейса приложений", "Технологии компонентного программирования", "Фреймворки: React, Vue, Angular", "Бэкенд: Node.js, Python, PHP"],
+        projects: ["Портал кафедры (React + Node.js)", "Система расписания ВГТУ", "LMS для дистанционного обучения", "Панель профориентации", "Интерактивные стенды ДОД"],
         partners: ["Innowise", "iTechArt", "EPAM", "IBA Group"],
         graduates: ["React-разработчик в Innowise", "Fullstack в EPAM", "Frontend в IBA", "React Native разработчик", "Vue-разработчик в стартапе"],
         qr: "https://github.com/isit-vstu"
       },
       {
-        id: "dotnet",
-        name: ".NET / C# экосистема",
-        desc: "Энтерпрайз, десктоп, микросервисы — стек для крупных корпоративных систем",
-        icon: "💜",
-        color: "linear-gradient(135deg, #512bd4, #9b59b6)",
-        count: 10,
-        disciplines: [
-          "Объектно-ориентированное программирование",
-          "Технологии компонентного программирования",
-          "Современные средства разработки серверных приложений",
-          "Архитектура информационных систем",
-          "Технологии проектирования ПО ИС",
-          "Управление разработкой ПО",
-          "Системное программирование",
-          "Архитектура операционных систем",
-          "Сетевое программирование",
-          "Безопасность приложений"
-        ],
-        projects: [
-          "SCADA для ОВЕН (C#, Modbus)",
-          "1С-интеграции ПКБ «Витебск»",
-          "Бухгалтерский комплекс ПКБ",
-          "Автоматизация складского учёта",
-          "Desktop-клиент для IoT"
-        ],
+        id: "dotnet", name: ".NET / C# экосистема", desc: "Энтерпрайз, десктоп, микросервисы — стек для крупных корпоративных систем", icon: "💜", color: "linear-gradient(135deg, #512bd4, #9b59b6)", count: 10,
+        disciplines: ["Объектно-ориентированное программирование", "Технологии компонентного программирования", "Современные средства разработки серверных приложений", "Архитектура информационных систем", "Технологии проектирования ПО ИС", "Управление разработкой ПО", "Системное программирование", "Архитектура операционных систем", "Сетевое программирование", "Безопасность приложений"],
+        projects: ["SCADA для ОВЕН (C#, Modbus)", "1С-интеграции ПКБ «Витебск»", "Бухгалтерский комплекс ПКБ", "Автоматизация складского учёта", "Desktop-клиент для IoT"],
         partners: ["ПКБ «Витебск»", "1С", "ОВЕН", "Промышленные предприятия"],
         graduates: ["C# .NET в ПКБ «Витебск»", "Backend в банке", "1С-разработчик", "WPF-разработчик", "Unity-разработчик"],
         qr: "https://github.com/isit-vstu/dotnet"
       },
       {
-        id: "java",
-        name: "Java / Spring",
-        desc: "Высоконагруженные бэкенды, микросервисы, облачные нативные приложения",
-        icon: "☕",
-        color: "linear-gradient(135deg, #e67e22, #f39c12)",
-        count: 10,
-        disciplines: [
-          "Объектно-ориентированное программирование",
-          "Программирование сетевых приложений",
-          "Распределенные системы обработки информации",
-          "Современные технологии разработки ПО",
-          "Системный анализ и проектирование ИС",
-          "Технологии компонентного программирования"
-        ],
-        projects: [
-          "Микросервисная платформа стажировок",
-          "API-шлюз для партнёров",
-          "Система мониторинга оборудования",
-          "Event-driven архитектура для IoT"
-        ],
+        id: "java", name: "Java / Spring", desc: "Высоконагруженные бэкенды, микросервисы, облачные нативные приложения", icon: "☕", color: "linear-gradient(135deg, #e67e22, #f39c12)", count: 10,
+        disciplines: ["Объектно-ориентированное программирование", "Программирование сетевых приложений", "Распределенные системы обработки информации", "Современные технологии разработки ПО", "Системный анализ и проектирование ИС"],
+        projects: ["Микросервисная платформа стажировок", "API-шлюз для партнёров", "Система мониторинга оборудования", "Event-driven архитектура для IoT"],
         partners: ["Innowise", "IBA", "EPAM", "Банковский сектор"],
         graduates: ["Java-разработчик в Innowise", "Spring Boot в EPAM", "Backend в IBA", "Kotlin-разработчик"],
         qr: "https://github.com/isit-vstu/java"
       },
       {
-        id: "python",
-        name: "Python / Data / AI",
-        desc: "Data Science, ML, компьютерное зрение, автоматизация, научные расчёты",
-        icon: "🐍",
-        color: "linear-gradient(135deg, #306998, #3e8ed0)",
-        count: 10,
-        disciplines: [
-          "Искусственный интеллект",
-          "Компьютерное зрение и распознавание образов",
-          "Мат. моделирование объектов управления",
-          "Методы управления в сложных системах",
-          "Современные методы организации работы над проектом",
-          "Теория оптимальных систем",
-          "Планирование эксперимента",
-          "Модели и методы поддержки принятия решений",
-          "Big Data и аналитика",
-          "Data Science основы"
-        ],
-        projects: [
-          "Компьютерное зрение дефектов (OpenCV)",
-          "Прогнозирование отказов оборудования",
-          "Бот профориентации (Telegram API)",
-          "ML-пайплайн для анализа логов",
-          "Автоматизация отчётности (pandas)"
-        ],
+        id: "python", name: "Python / Data / AI", desc: "Data Science, ML, компьютерное зрение, автоматизация, научные расчёты", icon: "🐍", color: "linear-gradient(135deg, #306998, #3e8ed0)", count: 10,
+        disciplines: ["Искусственный интеллект", "Компьютерное зрение и распознавание образов", "Мат. моделирование объектов управления", "Методы управления в сложных системах", "Современные методы организации работы над проектом", "Теория оптимальных систем", "Планирование эксперимента", "Модели и методы поддержки принятия решений", "Big Data и аналитика", "Data Science основы"],
+        projects: ["Компьютерное зрение дефектов (OpenCV)", "Прогнозирование отказов оборудования", "Бот профориентации (Telegram API)", "ML-пайплайн для анализа логов", "Автоматизация отчётности (pandas)"],
         partners: ["KUKA", "Научные лаборатории ВГТУ", "ОИПИ НАН Беларуси", "Научные центры"],
         graduates: ["ML Engineer", "Data Scientist", "Python-разработчик автоматизации", "Computer Vision Engineer", "Data Analyst"],
         qr: "https://github.com/isit-vstu/python"
       },
       {
-        id: "database",
-        name: "Базы данных и аналитика",
-        desc: "Проектирование БД, СУБД, Data Warehouse, BI, поддержка решений",
-        icon: "🗄️",
-        color: "linear-gradient(135deg, #00b478, #00d48a)",
-        count: 10,
-        disciplines: [
-          "Базы данных",
-          "Проектирование баз данных",
-          "Современные системы управления БД",
-          "Базы знаний и поддержка принятия решений",
-          "Экономико-математические методы в системном анализе",
-          "Планирование эксперимента",
-          "Системный анализ в научных исследованиях",
-          "Data Warehouse",
-          "BI и визуализация",
-          "Migration и интеграция"
-        ],
-        projects: [
-          "DWH для отчётности деканата",
-          "Аналитическая панель HR (Power BI)",
-          "Миграция легаси на PostgreSQL",
-          "ETL-пайплайны для 1С"
-        ],
+        id: "database", name: "Базы данных и аналитика", desc: "Проектирование БД, СУБД, Data Warehouse, BI, поддержка решений", icon: "🗄️", color: "linear-gradient(135deg, #00b478, #00d48a)", count: 10,
+        disciplines: ["Базы данных", "Проектирование баз данных", "Современные системы управления БД", "Базы знаний и поддержка принятия решений", "Экономико-математические методы в системном анализе", "Планирование эксперимента", "Системный анализ в научных исследованиях", "Data Warehouse", "BI и визуализация", "Migration и интеграция"],
+        projects: ["DWH для отчётности деканата", "Аналитическая панель HR (Power BI)", "Миграция легаси на PostgreSQL", "ETL-пайплайны для 1С"],
         partners: ["ПКБ «Витебск»", "Банковский сектор", "Гос. заказчики", "BI-команды"],
         graduates: ["DBA / Data Engineer", "BI-аналитик", "1С-разработчик (БД)", "SQL-разработчик", "Data Architect"],
         qr: "https://github.com/isit-vstu/database"
       },
       {
-        id: "mobile",
-        name: "Мобильная разработка",
-        desc: "Android, кроссплатформенные приложения, мобильные интерфейсы",
-        icon: "📱",
-        color: "linear-gradient(135deg, #3ddc84, #00c853)",
-        count: 10,
-        disciplines: [
-          "Разработка мобильных приложений: Android SDK",
-          "Разработка мультимедийных приложений",
-          "Разработка пользовательского интерфейса",
-          "Современные технологии разработки web-приложений (PWA)",
-          "Технологии компонентного программирования",
-          "Кроссплатформенная разработка",
-          "Мобильная архитектура",
-          "App Store / Google Play guidelines",
-          "UI/UX для мобильных",
-          "Перфоманс-оптимизация мобильных"
-        ],
-        projects: [
-          "Приложение «Расписание ВГТУ» (React Native)",
-          "Мобильный клиент SCADA",
-          "PWA для профориентации",
-          "Android-приложение для учёта практики"
-        ],
+        id: "mobile", name: "Мобильная разработка", desc: "Android, кроссплатформенные приложения, мобильные интерфейсы", icon: "📱", color: "linear-gradient(135deg, #3ddc84, #00c853)", count: 10,
+        disciplines: ["Разработка мобильных приложений: Android SDK", "Разработка мультимедийных приложений", "Разработка пользовательского интерфейса", "Современные технологии разработки web-приложений (PWA)", "Технологии компонентного программирования", "Кроссплатформенная разработка", "Мобильная архитектура", "App Store / Google Play guidelines", "UI/UX для мобильных", "Перфоманс-оптимизация мобильных"],
+        projects: ["Приложение «Расписание ВГТУ» (React Native)", "Мобильный клиент SCADA", "PWA для профориентации", "Android-приложение для учёта практики"],
         partners: ["Innowise", "Мобильные команды ПКБ", "Стартапы студентов", "App Store / Google Play"],
         graduates: ["Android-разработчик", "React Native разработчик", "Flutter-разработчик", "iOS-разработчик (Swift)"],
         qr: "https://github.com/isit-vstu/mobile"
       },
       {
-        id: "security",
-        name: "Кибербезопасность и сети",
-        desc: "Защита информации, сетевые технологии, криптография, безопасность ПО",
-        icon: "🔐",
-        color: "linear-gradient(135deg, #e74c3c, #c0392b)",
-        count: 10,
-        disciplines: [
-          "Защита информации в компьютерных системах",
-          "Инновационные технологии обеспечения компьютерной безопасности",
-          "Компьютерные сети",
-          "Технологии поиска, передачи и защиты данных",
-          "Системное программирование",
-          "Архитектура операционных систем",
-          "Тестирование программного обеспечения",
-          "Криптография и хеширование",
-          "SIEM-системы",
-          "Pen-testing и аудит"
-        ],
-        projects: [
-          "Аудит безопасности веб-порталов",
-          "VPN-инфраструктура кафедры",
-          "Secure CI/CD pipeline",
-          "SIEM для мониторинга инцидентов"
-        ],
+        id: "security", name: "Кибербезопасность и сети", desc: "Защита информации, сетевые технологии, криптография, безопасность ПО", icon: "🔐", color: "linear-gradient(135deg, #e74c3c, #c0392b)", count: 10,
+        disciplines: ["Защита информации в компьютерных системах", "Инновационные технологии обеспечения компьютерной безопасности", "Компьютерные сети", "Технологии поиска, передачи и защиты данных", "Системное программирование", "Архитектура операционных систем", "Тестирование программного обеспечения", "Криптография и хеширование", "SIEM-системы", "Pen-testing и аудит"],
+        projects: ["Аудит безопасности веб-порталов", "VPN-инфраструктура кафедры", "Secure CI/CD pipeline", "SIEM для мониторинга инцидентов"],
         partners: ["ОИПИ НАН Беларуси", "Гос. органы защиты информации", "Kaspersky Academy", "Positive Technologies"],
         graduates: ["Security Engineer", "SOC-аналитик", "DevSecOps", "Penetration Tester", "Network Security Engineer"],
         qr: "https://github.com/isit-vstu/security"
       },
       {
-        id: "embedded",
-        name: "Встраиваемые системы и IoT",
-        desc: "Микроконтроллеры, ПЛК, SCADA, промышленная автоматизация, робототехника",
-        icon: "⚙️",
-        color: "linear-gradient(135deg, #34495e, #2c3e50)",
-        count: 10,
-        disciplines: [
-          "Компьютерные системы конечноэлементных расчетов",
-          "Компьютерная поддержка инженерного анализа",
-          "Технические средства информационных систем",
-          "Организация и функционирование ЭВМ",
-          "Модели и методы поддержки принятия решений",
-          "Системный анализ в научных исследованиях",
-          "Оптимизация проектных решений",
-          "ПЛК и автоматизация",
-          "IoT-бrazеры",
-          "Интеграция с ERP"
-        ],
-        projects: [
-          "SCADA ОВЕН Телемеханика ЛАЙТ",
-          "Роботы KUKA — лабораторные стенды",
-          "IoT-мониторинг оборудования цеха",
-          "ПЛК-программирование (Codesys)"
-        ],
+        id: "embedded", name: "Встраиваемые системы и IoT", desc: "Микроконтроллеры, ПЛК, SCADA, промышленная автоматизация, робототехника", icon: "⚙️", color: "linear-gradient(135deg, #34495e, #2c3e50)", count: 10,
+        disciplines: ["Компьютерные системы конечноэлементных расчетов", "Компьютерная поддержка инженерного анализа", "Технические средства информационных систем", "Организация и функционирование ЭВМ", "Модели и методы поддержки принятия решений", "Системный анализ в научных исследованиях", "Оптимизация проектных решений", "ПЛК и автоматизация", "IoT-бrazеры", "Интеграция с ERP"],
+        projects: ["SCADA ОВЕН Телемеханика ЛАЙТ", "Роботы KUKA — лабораторные стенды", "IoT-мониторинг оборудования цеха", "ПЛК-программирование (Codesys)"],
         partners: ["ОВЕН", "KUKA", "ПКБ «Витебск»", "Промышленные предприятия", "Робототехнические клубы"],
         graduates: ["Embedded-разработчик", "Автоматизация (ПЛК/SCADA)", "IoT-инженер", "Робототехник", "Промышленный программист"],
         qr: "https://github.com/isit-vstu/embedded"
       },
       {
-        id: "uiux",
-        name: "UI/UX и графика",
-        desc: "Интерфейсы, компьютерная графика, мультимедиа, пользовательский опыт",
-        icon: "🎨",
-        color: "linear-gradient(135deg, #e91e63, #ad1457)",
-        count: 10,
-        disciplines: [
-          "Компьютерная графика",
-          "Системы компьютерной графики",
-          "Разработка пользовательского интерфейса приложений",
-          "Информатика и компьютерная графика",
-          "Разработка мультимедийных приложений",
-          "Средства визуального программирования",
-          "UI-дизайн",
-          "Motion-дизайн",
-          "Usability-тестирование",
-          "Prototyping инструменты"
-        ],
-        projects: [
-          "Дизайн-система портала кафедры",
-          "Интерактивные стенды Дней открытых дверей",
-          "Визуализация данных для SCADA",
-          "Моушн-дизайн для презентаций"
-        ],
+        id: "uiux", name: "UI/UX и графика", desc: "Интерфейсы, компьютерная графика, мультимедиа, пользовательский опыт", icon: "🎨", color: "linear-gradient(135deg, #e91e63, #ad1457)", count: 10,
+        disciplines: ["Компьютерная графика", "Системы компьютерной графики", "Разработка пользовательского интерфейса приложений", "Информатика и компьютерная графика", "Разработка мультимедийных приложений", "Средства визуального программирования", "UI-дизайн", "Motion-дизайн", "Usability-тестирование", "Prototyping инструменты"],
+        projects: ["Дизайн-система портала кафедры", "Интерактивные стенды Дней открытых дверей", "Визуализация данных для SCADA", "Моушн-дизайн для презентаций"],
         partners: ["Дизайн-команды Innowise", "Студии UX", "Фриланс-проекты", "Маркетинговые агентства"],
         graduates: ["UI/UX-дизайнер", "Motion-дизайнер", "Frontend с уклоном в UI", "Product Designer", "Графический дизайнер IT"],
         qr: "https://github.com/isit-vstu/uiux"
@@ -471,6 +272,7 @@
     const modalTitle = document.getElementById('modalTitle');
     const modalDesc = document.getElementById('modalDesc');
     const modalClose = document.getElementById('modalClose');
+    const qrPlaceholder = document.getElementById('qrPlaceholder');
 
     let expandedCluster = null;
 
@@ -479,6 +281,8 @@
       modalDesc.textContent = `Репозитории и материалы по направлению «${cluster.name}»`;
       modal.classList.add('visible');
       document.body.style.overflow = 'hidden';
+      // Можно подставить реальный QR здесь, например:
+      // qrPlaceholder.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=140&data=${encodeURIComponent(cluster.qr)}" alt="${cluster.name}">`;
     }
 
     function closeQR() {
@@ -496,10 +300,14 @@
 
     clusters_elements.forEach(el => {
       const cluster = clusters.find(c => c.id === el.dataset.id);
-      
+      if (!cluster) return;
+
       const header = el.querySelector('.cluster-header');
+      if (!header) return;
+
+      // Click/tap on header -> toggle expand
       header.addEventListener('click', (e) => {
-        if (e.target.closest('.cluster-expand-hint')) return;
+        if (e.target.closest('.cluster-expand-hint')) return; // don't toggle on hint explicitly if you want
         const isExpanded = el.classList.toggle('expanded');
         el.setAttribute('aria-expanded', isExpanded);
         if (isExpanded) {
@@ -509,14 +317,16 @@
           expandedCluster = null;
         }
       });
-      
+
+      // Keyboard support
       header.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           header.click();
         }
       });
-      
+
+      // Long press / double-tap -> QR
       let pressTimer;
       const startPress = () => { pressTimer = setTimeout(() => openQR(cluster), 500); };
       const endPress = () => clearTimeout(pressTimer);
@@ -525,12 +335,15 @@
       header.addEventListener('mouseleave', endPress);
       header.addEventListener('touchstart', startPress, { passive: true });
       header.addEventListener('touchend', endPress);
-      
+
+      // Also allow clicking the hint area to show QR
       const hint = el.querySelector('.cluster-expand-hint');
-      hint.addEventListener('click', (e) => { e.stopPropagation(); openQR(cluster); });
-      hint.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); openQR(cluster); }
-      });
+      if (hint) {
+        hint.addEventListener('click', (e) => { e.stopPropagation(); openQR(cluster); });
+        hint.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); openQR(cluster); }
+        });
+      }
     });
 
     modalClose.addEventListener('click', closeQR);
@@ -548,7 +361,7 @@
       }, i * 60);
     });
 
-    // Auto-collapse on resize if mobile
+    // Auto-reset expanded on resize if mobile
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
